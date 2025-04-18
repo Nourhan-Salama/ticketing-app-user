@@ -9,8 +9,12 @@ class LoginState extends Equatable {
   final bool isSuccess;
   final bool obscurePassword;
   final bool rememberMe;
+  final String name;
+  final String email;
 
   const LoginState({
+    this.email = '',
+    this.name = '',
     this.emailError,
     this.passwordError,
     this.errorMessage,
@@ -31,7 +35,8 @@ class LoginState extends Equatable {
     bool? isLoading,
     bool? isSuccess,
     bool? obscurePassword,
-    bool? rememberMe,
+    bool? rememberMe, 
+      String? email,  name,
   }) {
     return LoginState(
       emailError: emailError,
@@ -57,5 +62,6 @@ class LoginState extends Equatable {
         rememberMe,
       ];
 }
+
 
 

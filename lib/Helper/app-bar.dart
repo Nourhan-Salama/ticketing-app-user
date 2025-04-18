@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/cubits/profile-cubit.dart';
 
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onPressed;
@@ -45,6 +44,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     imagePath = state.imagePath;
                   }
 
+                  ImageProvider imageProvider;
+                  if (imagePath != null &&
+                      imagePath.isNotEmpty &&
+                      File(imagePath).existsSync()) {
+                    imageProvider = FileImage(File(imagePath));
+                  } else {
+                    imageProvider = const AssetImage('assets/icons/avatar.png');
+                  }
+
                   return Container(
                     width: 47,
                     height: 47,
@@ -54,9 +62,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     child: CircleAvatar(
                       radius: 22,
-                      backgroundImage: (imagePath != null && imagePath.isNotEmpty)
-                          ? FileImage(File(imagePath)) as ImageProvider
-                          : const AssetImage('assets/icons/avatar.png'),
+                      backgroundImage: imageProvider,
                     ),
                   );
                 },

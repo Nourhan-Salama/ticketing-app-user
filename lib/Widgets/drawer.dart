@@ -1,16 +1,16 @@
 import 'dart:io';
-import 'package:final_app/cubits/prpfile-state.dart';
+import 'package:final_app/cubits/profile-cubit.dart';
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/services/logout-service.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/profile-cubit.dart';
 import 'package:final_app/Helper/text-icon-button.dart';
 import 'package:final_app/screens/all-tickets.dart';
 import 'package:final_app/screens/chat-page.dart';
 import 'package:final_app/screens/edit-profile.dart';
 import 'package:final_app/screens/user-dashboard.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -20,22 +20,49 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
+  String? userName;
+  String? userEmail;
+  String? userImagePath;
+  bool isUserInfoLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final storage = FlutterSecureStorage();
+    try {
+      final name = await storage.read(key: 'user_name');
+      final email = await storage.read(key: 'user_email');
+
+      setState(() {
+        userName = name;
+        userEmail = email;
+        isUserInfoLoading = false;
+      });
+    } catch (e) {
+      print('Error loading user info: $e');
+      setState(() {
+        isUserInfoLoading = false;
+      });
+    }
+  }
+
   String getCurrentRoute(BuildContext context) {
-    return ModalRoute.of(context)?.settings.name ??
-        UserDashboard.routeName; // Default
+    return ModalRoute.of(context)?.settings.name ?? UserDashboard.routeName;
   }
 
   void navigateToScreen(BuildContext context, String routeName) {
     if (getCurrentRoute(context) == routeName) {
-      Navigator.pop(
-          context); // If already on the same page, just close the drawer
+      Navigator.pop(context);
       return;
     }
 
-    Navigator.pop(context); // Close the drawer
+    Navigator.pop(context);
 
-    if (routeName == '/dashboard') {
-      // Reset the navigation stack when going to Dashboard
+    if (routeName == UserDashboard.routeName) {
       Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false);
     } else {
       Navigator.pushNamed(context, routeName);
@@ -53,7 +80,7 @@ class _MyDrawerState extends State<MyDrawer> {
         child: Column(
           children: [
             const SizedBox(height: 15),
-            buildHeader(context),
+            _buildHeader(context),
             const SizedBox(height: 40),
             TextIconButton(
               icon: Icons.dashboard,
@@ -74,6 +101,7 @@ class _MyDrawerState extends State<MyDrawer> {
               isSelected: currentRoute == ChatsPage.routeName,
               onPressed: () => navigateToScreen(context, ChatsPage.routeName),
             ),
+            const Spacer(),
             Align(
               child: TextIconButton(
                 icon: Icons.logout,
@@ -101,68 +129,91 @@ class _MyDrawerState extends State<MyDrawer> {
                   }
                 },
               ),
-            )
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget buildHeader(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
-      builder: (context, state) {
-        String? imagePath;
-        if (state is ProfileLoaded) {
-          imagePath = state.imagePath;
-        }
+  Widget _buildHeader(BuildContext context) {
+    if (isUserInfoLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        return Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: ColorsHelper.darkBlue,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: (imagePath != null && imagePath.isNotEmpty)
-                      ? FileImage(File(imagePath)) as ImageProvider
-                      : const AssetImage('assets/icons/avatar.png'),
-                ),
-              ),
+    String name = userName ?? 'Hello Gust';
+    String email = userEmail ?? '';
+    String? imageUrl;
+
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: ColorsHelper.darkBlue,
+              borderRadius: BorderRadius.circular(5),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Nourhan Salama',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'May 12 2024',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
+            child: CircleAvatar(
+              radius: 30,
+              backgroundImage: _getImageProvider(imageUrl),
             ),
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context); // Close drawer first
-                Navigator.pushNamed(context, ProfileScreen.routeName);
-              },
-              icon: const Icon(Icons.edit),
-              iconSize: 20,
-            )
-          ],
-        );
-      },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                email,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () async {
+            Navigator.pop(context);
+
+            await Navigator.pushNamed(context, EditProfileScreen.routeName);
+
+            await _loadUserInfo();
+          },
+          icon: const Icon(Icons.edit),
+          iconSize: 20,
+        ),
+
+        // IconButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //     Navigator.pushNamed(context, EditProfileScreen.routeName)
+        //         .then((_) {
+        //       context.read<ProfileCubit>().loadProfile();
+        //     });
+        //   },
+        //   icon: const Icon(Icons.edit),
+        //   iconSize: 20,
+        // ),
+      ],
     );
+  }
+
+  ImageProvider _getImageProvider(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return const AssetImage('assets/icons/avatar.png');
+    }
+    return FileImage(File(imageUrl));
   }
 }

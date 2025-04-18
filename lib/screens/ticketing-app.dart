@@ -1,8 +1,10 @@
 import 'package:final_app/Helper/enum-helper.dart';
 import 'package:final_app/screens/chande-password.dart';
 import 'package:final_app/screens/otp-screen.dart';
+import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
 import 'package:final_app/services/service-profile.dart';
+import 'package:final_app/services/verify_user_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,7 +24,7 @@ import 'package:final_app/cubits/login-cubit.dart';
 import 'package:final_app/services/login-service.dart';
 import 'package:final_app/services/resend-otp-api.dart';
 import 'package:final_app/services/send-forget-pass-api.dart';
-import 'package:final_app/services/verify_user_auth.dart';
+
 
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/screens/all-tickets.dart';
@@ -57,91 +59,73 @@ class TicketingApp extends StatelessWidget {
         ),
         RepositoryProvider(create: (_) => SendForgetPassApi()),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-              create: (context) =>
-                  LoginCubit(authApi: context.read<AuthApi>())),
-          BlocProvider(create: (_) => RichTextCubit(), lazy: false),
-          BlocProvider(create: (_) => TicketsCubit(), lazy: false),
-          BlocProvider(create: (_) => CreateNewCubit()),
-          BlocProvider(
-              create: (_) => ProfileCubit(context.read<ProfileService>())),
-          BlocProvider(create: (_) => SignUpCubit()),
-          BlocProvider(create: (_) => ChangePasswordCubit()),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          initialRoute: SplashScreen.routeName,
-          routes: {
-            SplashScreen.routeName: (_) => SplashScreen(),
-            LoginScreen.routeName: (_) => LoginScreen(),
-            UserDashboard.routeName: (_) => UserDashboard(),
-            AllTickets.routeName: (_) => AllTickets(),
-            ChatsPage.routeName: (_) => ChatsPage(),
-            ProfileScreen.routeName: (_) => ProfileScreen(),
-            CreateNewScreen.routeName: (_) => CreateNewScreen(),
-
-            ResetPasswordScreen.routeName: (context) {
-              final sendForgetPassApi =
-                  RepositoryProvider.of<SendForgetPassApi>(context);
-
-              return BlocProvider(
-                create: (_) => ResetPasswordCubit(sendForgetPassApi),
-                child: ResetPasswordScreen(),
-              );
-            },
-
-            ChangePasswordScreen.routeName: (_) => ChangePasswordScreen(
-                  handle: '',
-                  verificationCode: '',
-                ),
-
-            // التعديل هنا في OtpVerificationPage
-            OtpVerificationPage.routeName: (context) {
-              final args = ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
-              final email = args['email'] as String;
-              final otpType = args['otpType'] as OtpType;
-
-              // توفير الـ OtpCubit بناءً على الـ otpType
-              if (otpType == OtpType.resetPassword) {
-                return BlocProvider(
-                  create: (_) => OtpCubit(
-                    context.read<VerifyUserApi>(),
-                    context.read<ResendOtpApi>(),
-                    email,
-                    otpType,
-                  ),
-                  child: OtpVerificationPage(
-                    email: email,
-                    otpType: otpType,
-                  ),
-                );
-              }
-
-              // حالة التحقق من المستخدم
-              return BlocProvider(
-                create: (_) => OtpCubit(
-                  context.read<VerifyUserApi>(),
-                  context.read<ResendOtpApi>(),
-                  email,
-                  otpType,
-                ),
-                child: OtpVerificationPage(
-                  email: email,
-                  otpType: otpType,
-                ),
-              );
-            },
-          },
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            scaffoldBackgroundColor: Colors.white,
-          ),
-        ),
+      child: Builder(
+        builder: (context) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => LoginCubit(authApi: context.read<AuthApi>()),
+              ),
+              BlocProvider(create: (_) => RichTextCubit()),
+              BlocProvider(create: (_) => TicketsCubit()),
+              BlocProvider(create: (_) => CreateNewCubit()),
+              BlocProvider(
+                create: (context) => ProfileCubit(context.read<ProfileService>()),
+              ),
+              BlocProvider(create: (_) => SignUpCubit()),
+              BlocProvider(create: (_) => ChangePasswordCubit()),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              initialRoute: SplashScreen.routeName,
+              routes: {
+                SplashScreen.routeName: (_) => SplashScreen(),
+                LoginScreen.routeName: (_) => LoginScreen(),
+                UserDashboard.routeName: (_) => UserDashboard(),
+                AllTickets.routeName: (_) => AllTickets(),
+                ChatsPage.routeName: (_) => ChatsPage(),
+                EditProfileScreen.routeName: (_) => EditProfileScreen(),
+                Profile.routName: (_) => Profile(),
+                CreateNewScreen.routeName: (_) => CreateNewScreen(),
+                ResetPasswordScreen.routeName: (context) {
+                  final sendForgetPassApi =
+                      RepositoryProvider.of<SendForgetPassApi>(context);
+                  return BlocProvider(
+                    create: (_) => ResetPasswordCubit(sendForgetPassApi),
+                    child: ResetPasswordScreen(),
+                  );
+                },
+                ChangePasswordScreen.routeName: (_) => ChangePasswordScreen(
+                      handle: '',
+                      verificationCode: '',
+                    ),
+                OtpVerificationPage.routeName: (context) {
+                  final args = ModalRoute.of(context)!.settings.arguments
+                      as Map<String, dynamic>;
+                  final email = args['email'] as String;
+                  final otpType = args['otpType'] as OtpType;
+                  return BlocProvider(
+                    create: (_) => OtpCubit(
+                      context.read<VerifyUserApi>(),
+                      context.read<ResendOtpApi>(),
+                      email,
+                      otpType,
+                    ),
+                    child: OtpVerificationPage(
+                      email: email,
+                      otpType: otpType,
+                    ),
+                  );
+                },
+              },
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+                scaffoldBackgroundColor: Colors.white,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
-

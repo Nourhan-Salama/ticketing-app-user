@@ -8,12 +8,11 @@ class AuthApi {
   final FlutterSecureStorage secureStorage;
 
   AuthApi({
-    this.baseUrl = "https://graduation.arabic4u.org", 
+    this.baseUrl = "https://graduation.arabic4u.org",
     http.Client? client,
     FlutterSecureStorage? storage,
-  }) : 
-    client = client ?? http.Client(),
-    secureStorage = storage ?? const FlutterSecureStorage();
+  })  : client = client ?? http.Client(),
+        secureStorage = storage ?? const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> login({
     required String handle,
@@ -30,7 +29,6 @@ class AuthApi {
 
       final responseData = jsonDecode(response.body);
 
-      // Debug print to see actual response structure
       print('API Response: $responseData');
 
       if (response.statusCode == 200) {
@@ -39,9 +37,15 @@ class AuthApi {
         }
 
         final data = responseData['data'];
-        
+
         // Save tokens
         await _saveTokens(data['token'], data['refresh_token']);
+
+        // Save user info
+        await _saveUserInfo(
+          data['user']['name'],
+          data['user']['email'],
+        );
 
         return {
           'code': 200,
@@ -85,6 +89,38 @@ class AuthApi {
     }
   }
 
+// auth-api.dart (updated)
+  Future<void> _saveUserInfo(String name, String email) async {
+    try {
+      await secureStorage.write(
+          key: 'user_name', value: name); // Changed from 'name'
+      await secureStorage.write(
+          key: 'user_email', value: email); // Changed from 'email'
+      print('User info saved successfully');
+    } catch (e) {
+      print('Error saving user info: $e');
+      throw Exception('Failed to save user info');
+    }
+  }
+
+  Future<String?> getUserName() async {
+    try {
+      return await secureStorage.read(key: 'user_name');
+    } catch (e) {
+      print('Error reading user name: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getUserEmail() async {
+    try {
+      return await secureStorage.read(key: 'user_email');
+    } catch (e) {
+      print('Error reading user email: $e');
+      return null;
+    }
+  }
+
   Future<String?> _getAccessToken() async {
     try {
       return await secureStorage.read(key: 'access_token');
@@ -107,10 +143,7 @@ class AuthApi {
     try {
       String? token = await _getAccessToken();
       if (token == null) {
-        return {
-          'code': 401,
-          'message': 'No access token found'
-        };
+        return {'code': 401, 'message': 'No access token found'};
       }
 
       final response = await client.get(
@@ -181,5 +214,3 @@ class AuthApi {
     }
   }
 }
-
-

@@ -25,33 +25,29 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: BlocProvider(
         create: (context) => LoginCubit(authApi: AuthApi()),
-        child: BlocListener<LoginCubit, LoginState>(listener: (context, state) {
-         
-          print(
-              "BlocListener detected state change: isSuccess=\${state.isSuccess}");
-
-          if (state.isSuccess) {
-            print("Navigating to: \${UserDashboard.routeName}");
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacementNamed(context, UserDashboard.routeName);
-            });
-
-            print("Should be on Dashboard now");
-          }
-          if (state.errorMessage != null && !state.isLoading) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.errorMessage!),
-                  backgroundColor: Colors.red,
-                ),
+        child: BlocListener<LoginCubit, LoginState>(
+          listener: (context, state) {
+            if (state.isSuccess) {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                UserDashboard.routeName,
+                (route) => false,
               );
-              // Clear the error after showing it
-              context.read<LoginCubit>().clearError();
-            });
-          }
-        } , child: _buildBody(context)
-        )
+            }
+            if (state.errorMessage != null && !state.isLoading) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage!),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                context.read<LoginCubit>().clearError();
+              });
+            }
+          },
+          child: _buildBody(context),
+        ),
       ),
     );
   }
