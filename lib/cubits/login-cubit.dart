@@ -1,3 +1,4 @@
+import 'package:final_app/services/service-profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,11 +8,13 @@ import 'package:final_app/services/login-service.dart';
 class LoginCubit extends Cubit<LoginState> {
   final AuthApi authApi;
   final FlutterSecureStorage secureStorage;
+  final ProfileService? profileService;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   LoginCubit({
     required this.authApi,
+     this.profileService,
     FlutterSecureStorage? storage,
   })  : secureStorage = storage ?? const FlutterSecureStorage(),
         super(LoginState.initial()) {

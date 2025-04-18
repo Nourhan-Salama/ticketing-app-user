@@ -1,6 +1,7 @@
 import 'package:final_app/Helper/Custom-big-button.dart';
 import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/services/login-service.dart';
+import 'package:final_app/services/service-profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/cubits/login-cubit.dart';
@@ -10,6 +11,9 @@ import 'package:final_app/screens/rest-screen.dart';
 import 'package:final_app/screens/sign-up.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:final_app/util/responsive-helper.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
@@ -24,7 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => LoginCubit(authApi: AuthApi()),
+        create: (context) => LoginCubit(authApi: AuthApi(),
+           profileService: ProfileService(
+      client: http.Client(),  
+      secureStorage: FlutterSecureStorage(), 
+    ),),
         child: BlocListener<LoginCubit, LoginState>(
           listener: (context, state) {
             if (state.isSuccess) {
