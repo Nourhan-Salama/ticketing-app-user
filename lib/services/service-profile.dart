@@ -47,10 +47,17 @@ class ProfileService {
       throw Exception('Error loading profile: $e');
     }
   }
-      Future<void> saveImagePath(String path) async {
-        final storage = const FlutterSecureStorage();
-        await storage.write(key: 'image_path', value: path);
-      }
+
+  Future<void> saveImagePath(String path) async {
+    final storage = const FlutterSecureStorage();
+    await storage.write(key: 'image_path', value: path);
+  }
+
+  Future<void> removeUserImage() async {
+    final storage = FlutterSecureStorage();
+    await storage.delete(key: 'imagePath');
+  }
+
   // Update profile with name, email, and optional avatar
   Future<Map<String, dynamic>> updateProfile({
     required String firstName,
@@ -80,7 +87,6 @@ class ProfileService {
           ),
         );
       }
-   
 
       final response = await request.send();
       final responseString = await response.stream.bytesToString();

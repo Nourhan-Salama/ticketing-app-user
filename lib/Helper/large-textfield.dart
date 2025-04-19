@@ -12,8 +12,8 @@ class RichTextEditor extends StatefulWidget {
   RichTextEditor({
     required this.controller,       
     this.isEnabled = true, 
-    required this.onChanged,
-    Key? key,
+     this.onChanged,
+    Key? key, String? successText, required String label, String? errorText,
   }) : super(key: key);
 
   @override
@@ -29,7 +29,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Text ',
+          'Description ',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -67,8 +67,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    hintText: "Enter your text",
-                    hintStyle: TextStyle(fontSize: 20.0, color: Color(0xFFB3B3B3)),
+                    hintText: "Type your description",
+                    hintStyle: TextStyle(fontSize: 15.0, color: Color(0xFFB3B3B3)),
                   ),
                   onChanged: widget.onChanged,
                 ),

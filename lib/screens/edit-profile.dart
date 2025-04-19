@@ -1,5 +1,5 @@
-//correct
 import 'dart:io';
+import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,7 +25,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Loading is now handled in cubit constructor
   }
 
   Future<void> _pickImage(BuildContext context, ImageSource source) async {
@@ -46,6 +45,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.responsivePadding(context);
+    final verticalSpace = ResponsiveHelper.heightPercent(context, 0.025);
+    final imageRadius = ResponsiveHelper.responsiveValue(
+      context: context,
+      mobile: 50,
+      tablet: 70,
+      desktop: 90,
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: MyDrawer(),
@@ -72,10 +80,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (state is ProfileLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          
-          // Use existing loaded state or create default one
-          final loadedState = state is ProfileLoaded 
-              ? state 
+
+          final loadedState = state is ProfileLoaded
+              ? state
               : ProfileLoaded(
                   firstName: '',
                   lastName: '',
@@ -84,14 +91,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 );
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: padding,
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
-                  _buildProfilePicture(context, loadedState.imageFile, loadedState.imagePath ?? ''),
-                  const SizedBox(height: 20),
+                  SizedBox(height: verticalSpace),
+                  _buildProfilePicture(context, loadedState.imageFile, loadedState.imagePath ?? '', imageRadius),
+                  SizedBox(height: verticalSpace),
 
                   CustomTextField(
                     successText: loadedState.firstNameSuccess,
@@ -105,7 +112,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _formKey.currentState?.validate();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: verticalSpace),
 
                   CustomTextField(
                     successText: loadedState.lastNameSuccess,
@@ -119,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _formKey.currentState?.validate();
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: verticalSpace),
 
                   CustomTextField(
                     successText: loadedState.emailSuccess,
@@ -134,7 +141,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _formKey.currentState?.validate();
                     },
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: verticalSpace * 1.5),
 
                   SubmitButton(
                     buttonText: 'Submit',
@@ -147,9 +154,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
 
                   if (loadedState.isLoading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: CircularProgressIndicator(),
+                    Padding(
+                      padding: EdgeInsets.only(top: verticalSpace),
+                      child: const CircularProgressIndicator(),
                     ),
                 ],
               ),
@@ -160,7 +167,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildProfilePicture(BuildContext context, File? file, String imagePath) {
+  Widget _buildProfilePicture(BuildContext context, File? file, String imagePath, double radius) {
     final ImageProvider imageProvider = file != null
         ? FileImage(file)
         : (imagePath.isNotEmpty
@@ -173,16 +180,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           GestureDetector(
             onTap: () => _showImageOptions(context),
             child: CircleAvatar(
-              radius: 50,
+              radius: radius,
               backgroundImage: imageProvider,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: ResponsiveHelper.heightPercent(context, 0.01)),
           GestureDetector(
             onTap: () => _showImageOptions(context),
-            child: const Text(
+            child: Text(
               'Change Photo',
-              style: TextStyle(fontSize: 16, color: Colors.black),
+              style: TextStyle(
+                fontSize: ResponsiveHelper.responsiveTextSize(context, 16),
+                color: Colors.black,
+              ),
             ),
           ),
         ],

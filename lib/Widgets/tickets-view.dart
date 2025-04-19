@@ -80,7 +80,7 @@ class _TicketsListState extends State<TicketsList> {
                   ),
                   child: DataTableWidget(
                     description: ticket.description,
-                    userName: ticket.userName,
+                    userName: '${ticket.firstName} ${ticket.lastName}',
                     status: ticket.status,
                     statusColor: ticket.statusColor,
                   ),

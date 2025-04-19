@@ -11,12 +11,12 @@ class CustomDropDownCreateButton extends StatefulWidget {
 
 class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton> {
 
-  List<String> items = ['0', '3', '6', '9', '12', '15'];
-  String selectedItem = '0';
+  List<String> items = ['None', '5', '10'];
+  String selectedItem = 'None';
 
   @override
   Widget build(BuildContext context) {
-    //final currentWidth = MediaQuery.of(Context).size.width;
+   
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -58,7 +58,8 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
                 onPressed: (){
                   // Navigator.pop(context); 
                   // Navigator.pushNamed(context, CreateNewScreen.routeName);
-                  Navigator.pushReplacementNamed(context, CreateNewScreen.routeName);
+                Navigator.pushNamed(context, CreateNewScreen.routeName);
+
 
                 },
                 child: Row(

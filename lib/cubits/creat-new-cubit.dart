@@ -1,94 +1,161 @@
-import 'package:final_app/cubits/get-ticket-cubits.dart';
-import 'package:final_app/models/ticket-model.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:final_app/cubits/create-new-state.dart';
+import 'package:final_app/cubits/get-ticket-cubits.dart';
+import 'package:final_app/models/ticket-model.dart';
 
-class CreateNewCubit extends Cubit<bool> {
-  CreateNewCubit() : super(false) {
-    for (var controller in controllers.values) {
-      controller.addListener(checkFields);
+class CreateNewCubit extends Cubit<CreateNewState> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController departmentController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
+  CreateNewCubit() : super(CreateNewState.initial()) {
+    _setupListeners();
+  }
+
+  void _setupListeners() {
+    firstNameController.addListener(_debouncedValidation);
+    lastNameController.addListener(_debouncedValidation);
+    emailController.addListener(_debouncedValidation);
+    departmentController.addListener(_debouncedValidation);
+    descriptionController.addListener(_debouncedValidation);
+  }
+
+  Timer? _debounceTimer;
+  void _debouncedValidation() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), validateFields);
+  }
+
+  void validateFields() {
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
+    final email = emailController.text.trim();
+    final department = departmentController.text.trim();
+    final description = descriptionController.text.trim();
+
+    // Clear previous states first
+    var newState = state.copyWith(
+      firstNameError: null,
+      lastNameError: null,
+      emailError: null,
+      descriptionError: null,
+      departmentError: null,
+      firstNameSuccess: null,
+      lastNameSuccess: null,
+      emailSuccess: null,
+      descriptionSuccess: null,
+      departmentSuccess: null,
+    );
+
+    // First Name validation
+    if (firstName.isNotEmpty) {
+      if (firstName.length < 2) {
+        newState = newState.copyWith(firstNameError: 'At least 2 characters');
+      } else {
+        newState = newState.copyWith(firstNameSuccess: 'Looks good!');
+      }
     }
+
+    // Last Name validation
+    if (lastName.isNotEmpty) {
+      if (lastName.length < 2) {
+        newState = newState.copyWith(lastNameError: 'At least 2 characters');
+      } else {
+        newState = newState.copyWith(lastNameSuccess: 'Looks good!');
+      }
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (email.isNotEmpty) {
+      if (!emailRegex.hasMatch(email)) {
+        newState = newState.copyWith(emailError: 'Invalid email format');
+      } else {
+        newState = newState.copyWith(emailSuccess: 'Valid email');
+      }
+    }
+
+    // Department validation
+    if (department.isEmpty) {
+      newState = newState.copyWith(departmentError: 'Please select department');
+    } else {
+      newState = newState.copyWith(departmentSuccess: 'Selected');
+    }
+
+    // Description validation
+    if (description.isNotEmpty) {
+      if (description.length < 10) {
+        newState = newState.copyWith(descriptionError: 'At least 10 characters');
+      } else {
+        newState = newState.copyWith(descriptionSuccess: 'Good description');
+      }
+    }
+
+    // Update button state
+    newState = newState.copyWith(
+      isButtonEnabled: firstName.isNotEmpty &&
+          lastName.isNotEmpty &&
+          emailRegex.hasMatch(email) &&
+          department.isNotEmpty &&
+          description.length >= 10,
+    );
+
+    emit(newState);
   }
 
-  final Map<String, TextEditingController> controllers = {
-    'firstName': TextEditingController(),
-    'lastName': TextEditingController(),
-    'email': TextEditingController(),
-    'department': TextEditingController(),
-    'richText': TextEditingController(),
-  };
-
-  void checkFields() {
-    final allFilled = controllers.values.every((c) => c.text.trim().isNotEmpty);
-    if (!isClosed) emit(allFilled);
-  }
-
-  void submitForm(BuildContext context) {
-    if (!state) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all fields'),
-          backgroundColor: Color(0xFFB3B3B3),
-        ),
-      );
+  Future<void> submitForm(BuildContext context) async {
+    if (!state.isButtonEnabled) {
+      emit(state.copyWith(
+        submissionError: 'Please complete all fields correctly',
+      ));
       return;
     }
 
-    final newTicket = TicketModel(
-      description: controllers["richText"]!.text.trim(),
-      userName: "${controllers["firstName"]!.text.trim()} "
-          "${controllers["lastName"]!.text.trim()}",
-      status: "Pending",
-      statusColor: Colors.grey,
-    );
+    emit(state.copyWith(isLoading: true));
 
     try {
+      final newTicket = TicketModel(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: emailController.text.trim(),
+        department: departmentController.text.trim(),
+        description: descriptionController.text.trim(),
+        status: "Pending",
+        statusColor: Colors.grey,
+        createdAt: DateTime.now(),
+      );
+
       context.read<TicketsCubit>().addTicket(newTicket);
-      _clearForm();
-      _showSuccessFeedback(context);
+      
+      emit(state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+      ));
     } catch (e) {
-      _handleError(context, e);
+      emit(state.copyWith(
+        isLoading: false,
+        submissionError: 'Submission failed: ${e.toString()}',
+      ));
     }
-  }
-
-  void _clearForm() {
-    for (final controller in controllers.values) {
-      controller.clear();
-    }
-    checkFields();
-  }
-
-  void _showSuccessFeedback(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Ticket Created Successfully!'),
-        backgroundColor: Color(0xFF051754),
-      ),
-    );
-    // Navigator.pop(context);
-    Navigator.pushReplacementNamed(context, '/all-tickets');
-
-  }
-
-  void _handleError(BuildContext context, dynamic error) {
-    debugPrint("Ticket submission error: $error");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Failed to create ticket'),
-        backgroundColor: Colors.grey,
-      ),
-    );
   }
 
   @override
   Future<void> close() {
-    debugPrint("CreateNewCubit disposed");
-    for (final controller in controllers.values) {
-      controller.dispose();
-    }
+    _debounceTimer?.cancel();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    departmentController.dispose();
+    descriptionController.dispose();
     return super.close();
   }
 }
+
 
 
 

@@ -44,7 +44,8 @@ class ProfileCubit extends Cubit<ProfileState> {
       lastNameSuccess = "Looks good!";
     }
 
-    final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    final emailRegex =
+        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     if (email.isEmpty) {
       emailError = 'Email cannot be empty';
     } else if (!emailRegex.hasMatch(email)) {
@@ -53,9 +54,8 @@ class ProfileCubit extends Cubit<ProfileState> {
       emailSuccess = "Valid Email!";
     }
 
-    final isButtonEnabled = firstNameError == null && 
-                          lastNameError == null && 
-                          emailError == null;
+    final isButtonEnabled =
+        firstNameError == null && lastNameError == null && emailError == null;
 
     emit(ProfileLoaded(
       firstName: firstName,
@@ -75,6 +75,10 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   Future<void> updateImage(File? imageFile) async {
     selectedImage = imageFile;
+    if (imageFile == null) {
+      await profileService.removeUserImage();
+    }
+
     if (state is ProfileLoaded) {
       emit((state as ProfileLoaded).copyWith(
         imageFile: imageFile,
@@ -84,7 +88,8 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   Future<void> saveProfile() async {
-    if (state is! ProfileLoaded || !(state as ProfileLoaded).isButtonEnabled) return;
+    if (state is! ProfileLoaded || !(state as ProfileLoaded).isButtonEnabled)
+      return;
 
     emit((state as ProfileLoaded).copyWith(isLoading: true));
 
@@ -100,8 +105,8 @@ class ProfileCubit extends Cubit<ProfileState> {
         firstName: (state as ProfileLoaded).firstName,
         lastName: (state as ProfileLoaded).lastName,
         email: (state as ProfileLoaded).email,
-        imagePath: (state as ProfileLoaded).imageFile?.path ?? 
-                 (state as ProfileLoaded).imagePath,
+        imagePath: (state as ProfileLoaded).imageFile?.path ??
+            (state as ProfileLoaded).imagePath,
       );
 
       emit((state as ProfileLoaded).copyWith(
@@ -126,7 +131,8 @@ class ProfileCubit extends Cubit<ProfileState> {
 
       final nameParts = fullName.split(" ");
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(" ") : '';
+      final lastName =
+          nameParts.length > 1 ? nameParts.sublist(1).join(" ") : '';
 
       firstNameController.text = firstName;
       lastNameController.text = lastName;
@@ -144,7 +150,8 @@ class ProfileCubit extends Cubit<ProfileState> {
         final fullName = localData['name'] ?? '';
         final nameParts = fullName.split(' ');
         final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-        final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        final lastName =
+            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         final email = localData['email'] ?? '';
         final imagePath = localData['image_path'] ?? '';
 
@@ -177,5 +184,3 @@ class ProfileCubit extends Cubit<ProfileState> {
     return super.close();
   }
 }
-
-

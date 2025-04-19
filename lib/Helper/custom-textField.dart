@@ -12,10 +12,13 @@ class CustomTextField extends StatefulWidget {
   final String label;
   final TextEditingController? controller;
   final List<String>? dropdownItems;
+   final String? selectedValue; 
   final ValueChanged<String?>? onChanged;
+  final bool? isDropdown;
 
   const CustomTextField({
     Key? key,
+    this.selectedValue,
     this.successText,
     this.onSuffixPressed,
     this.keyboardType,
@@ -27,7 +30,8 @@ class CustomTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.dropdownItems,
-    this.onChanged,
+    this.onChanged, 
+     this.isDropdown,
   }) : super(key: key);
 
   @override
@@ -108,6 +112,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 ],
               )
             : DropdownButtonFormField<String>(
+              value: widget.selectedValue,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
