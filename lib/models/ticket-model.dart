@@ -7,11 +7,15 @@ class TicketModel {
   final int status;
   final String description;
   final ServiceModel service;
+  // final String firstName;
+  // final String lastName;
   final UserModel user;
   final ManagerModel? manager;
   final TechnicianModel? technician;
 
   TicketModel({
+    // required this.firstName,
+    // required this.lastName,
     required this.id,
     required this.title,
     required this.status,

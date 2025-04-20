@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:final_app/models/ticket-details-model.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -107,23 +108,23 @@ Future<List<TicketModel>> getAllTickets() async {
   }
 }
 
-  Future<Map<String, dynamic>> getTicketById(int id) async {
-    final token = await _getToken();
-    final url = Uri.parse('$baseUrl/$id');
+ Future<TicketDetailsModel> getTicketDetails(int ticketId) async {
+  final token = await _getToken();
+  final url = Uri.parse('$baseUrl/$ticketId');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
-    );
+  final response = await http.get(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json['data'];
-    } else {
-      throw Exception('Failed to load ticket');
-    }
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    return TicketDetailsModel.fromJson(json['data']);
+  } else {
+    throw Exception('Failed to load ticket details: ${response.statusCode}');
   }
+}
 }

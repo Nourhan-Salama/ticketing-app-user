@@ -5,27 +5,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TicketsCubit extends Cubit<TicketsState> {
   final TicketService _ticketService;
+  List<TicketModel> _allTickets = [];
 
   TicketsCubit(this._ticketService) : super(TicketsInitial());
 
   Future<void> fetchTickets() async {
     emit(TicketsLoading());
     try {
-      final tickets = await _ticketService.getAllTickets();
-      if (tickets.isEmpty) {
-        emit(TicketsEmpty());
-      } else {
-        emit(TicketsLoaded(tickets));
-      }
+      _allTickets = await _ticketService.getAllTickets();
+      emit(TicketsLoaded(_allTickets)); // Always emit loaded state
     } catch (e) {
       emit(TicketsError("Failed to load tickets: ${e.toString()}"));
     }
   }
 
-  void addTicket(TicketModel newTicket) {
-    if (state is TicketsLoaded) {
-      final currentState = state as TicketsLoaded;
-      emit(TicketsLoaded([newTicket, ...currentState.tickets]));
+  void filterTickets(int count) {
+    if (count == 0) {
+      emit(TicketsLoaded([])); // Empty list instead of TicketsEmpty
+    } else {
+      final filteredTickets = _allTickets.take(count).toList();
+      emit(TicketsLoaded(filteredTickets));
     }
+  }
+
+  void addTicket(TicketModel newTicket) {
+    _allTickets.insert(0, newTicket);
+    emit(TicketsLoaded([newTicket, ..._allTickets]));
   }
 }

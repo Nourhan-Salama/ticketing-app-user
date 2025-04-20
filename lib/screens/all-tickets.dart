@@ -87,7 +87,10 @@ class _AllTicketsState extends State<AllTickets> {
                       tablet: 24,
                       desktop: 32,
                     )),
+
+                    
                     CustomDropDownCreateButton(),
+
                     SizedBox(height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,

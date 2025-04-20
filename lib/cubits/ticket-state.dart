@@ -19,4 +19,3 @@ class TicketsError extends TicketsState {
   final String message;
   TicketsError(this.message);
 }
-
