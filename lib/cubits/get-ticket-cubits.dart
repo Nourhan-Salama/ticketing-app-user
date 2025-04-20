@@ -1,30 +1,31 @@
-// get-ticket-cubits.dart
 import 'package:final_app/cubits/ticket-state.dart';
 import 'package:final_app/models/ticket-model.dart';
+import 'package:final_app/services/ticket-service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TicketsCubit extends Cubit<TicketsState> {
-  TicketsCubit() : super(TicketsInitial());
+  final TicketService _ticketService;
 
-  final List<TicketModel> _tickets = [];
+  TicketsCubit(this._ticketService) : super(TicketsInitial());
 
-  void fetchTickets() {
+  Future<void> fetchTickets() async {
     emit(TicketsLoading());
     try {
-      if (_tickets.isEmpty) {
+      final tickets = await _ticketService.getAllTickets();
+      if (tickets.isEmpty) {
         emit(TicketsEmpty());
       } else {
-        emit(TicketsLoaded(List.from(_tickets)));
+        emit(TicketsLoaded(tickets));
       }
     } catch (e) {
-      emit(TicketsError("Failed to load tickets"));
+      emit(TicketsError("Failed to load tickets: ${e.toString()}"));
     }
   }
 
   void addTicket(TicketModel newTicket) {
-    _tickets.add(newTicket);
-    emit(TicketsLoaded(List.from(_tickets)));
+    if (state is TicketsLoaded) {
+      final currentState = state as TicketsLoaded;
+      emit(TicketsLoaded([newTicket, ...currentState.tickets]));
+    }
   }
-
-
 }

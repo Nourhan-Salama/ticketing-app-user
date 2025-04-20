@@ -1,4 +1,5 @@
 import 'package:final_app/cubits/ticket-state.dart';
+import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,15 +7,22 @@ import 'package:final_app/cubits/get-ticket-cubits.dart';
 import 'package:final_app/Widgets/data-tabel.dart';
 import 'package:final_app/util/colors.dart';
 
-// tickets-view.dart
 class TicketsList extends StatefulWidget {
-  const TicketsList({super.key});
+  const TicketsList({super.key, required List<TicketModel> tickets});
 
   @override
   State<TicketsList> createState() => _TicketsListState();
 }
 
 class _TicketsListState extends State<TicketsList> {
+  Color _getStatusColor(int status) {
+    return status == 1 ? Colors.green : Colors.red;
+  }
+
+  String _getStatusText(int status) {
+    return status == 1 ? 'Open' : 'Closed';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TicketsCubit, TicketsState>(
@@ -80,9 +88,9 @@ class _TicketsListState extends State<TicketsList> {
                   ),
                   child: DataTableWidget(
                     description: ticket.description,
-                    userName: '${ticket.firstName} ${ticket.lastName}',
-                    status: ticket.status,
-                    statusColor: ticket.statusColor,
+                    userName: ticket.user.name,
+                    status: _getStatusText(ticket.status),
+                    statusColor: _getStatusColor(ticket.status),
                   ),
                 );
               },

@@ -20,4 +20,3 @@ class TicketsError extends TicketsState {
   TicketsError(this.message);
 }
 
-

@@ -4,6 +4,7 @@ import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
 import 'package:final_app/services/service-profile.dart';
+import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/services/verify_user_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,6 +59,7 @@ class TicketingApp extends StatelessWidget {
           ),
         ),
         RepositoryProvider(create: (_) => SendForgetPassApi()),
+        RepositoryProvider(create: (_)=> TicketService())
       ],
       child: Builder(
         builder: (context) {
@@ -67,7 +69,7 @@ class TicketingApp extends StatelessWidget {
                 create: (context) => LoginCubit(authApi: context.read<AuthApi>()),
               ),
               BlocProvider(create: (_) => RichTextCubit()),
-              BlocProvider(create: (_) => TicketsCubit()),
+              BlocProvider(create: (_) => TicketsCubit(context.read<TicketService>())),
               BlocProvider(create: (_) => CreateNewCubit()),
               BlocProvider(
                 create: (context) => ProfileCubit(context.read<ProfileService>()),
