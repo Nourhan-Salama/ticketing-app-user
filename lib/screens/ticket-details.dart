@@ -31,12 +31,12 @@ class TicketDetailsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: screenWidth * 0.12, // نسبة من عرض الشاشة
+                    radius: screenWidth * 0.12, 
                     backgroundColor: ColorsHelper.darkBlue,
                     child: Text(
                       getInitials(ticket.userName),
                       style: TextStyle(
-                        fontSize: screenWidth * 0.06, // حجم الخط 6% من عرض الشاشة
+                        fontSize: screenWidth * 0.06, 
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -115,10 +115,6 @@ class TicketDetailsScreen extends StatelessWidget {
 
             // Service Section
             _buildDetailRow('Service:', ticket.serviceName),
-
-            // Manager Section (if exists)
-            if (ticket.managerName != null)
-              _buildDetailRow('Assigned To:', ticket.managerName!),
 
             // Technician Section (if exists)
             if (ticket.technicianName != null)

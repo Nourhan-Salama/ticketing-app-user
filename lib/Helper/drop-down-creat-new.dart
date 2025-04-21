@@ -12,8 +12,8 @@ class CustomDropDownCreateButton extends StatefulWidget {
 }
 
 class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton> {
-  List<String> filterOptions = ['None', '5', '10'];
-  String currentFilter = 'None';
+  List<String> filterOptions = ['All Tickets', 'Last 5 Tickets', 'Last 10 Tickets'];
+  String currentFilter = 'All Tickets';
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +23,22 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
         Row(
           children: [
             SizedBox(
-              width: 100,
+              width: 150, // Increased width for better visibility
               child: DropdownButtonFormField<String>(
                 value: currentFilter,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 items: filterOptions.map((option) {
                   return DropdownMenuItem<String>(
                     value: option,
-                    child: Text(option),
+                    child: Text(
+                      option,
+                      style: TextStyle(fontSize: 14),
+                    ),
                   );
                 }).toList(),
                 onChanged: (selectedValue) {
@@ -42,10 +47,18 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
                   });
                   
                   final ticketCubit = context.read<TicketsCubit>();
-                  if (selectedValue == 'None') {
-                    ticketCubit.filterTickets(0);
-                  } else {
-                    ticketCubit.filterTickets(int.parse(selectedValue!));
+                  switch (selectedValue) {
+                    case 'All Tickets':
+                      ticketCubit.fetchTickets(refresh: true);
+                      break;
+                    case 'Last 5 Tickets':
+                      ticketCubit.filterTickets(5);
+                      break;
+                    case 'Last 10 Tickets':
+                      ticketCubit.filterTickets(10);
+                      break;
+                    default:
+                      ticketCubit.fetchTickets(refresh: true);
                   }
                 },
               ),

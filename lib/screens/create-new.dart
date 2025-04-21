@@ -101,43 +101,24 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                  
+                   
+              
+                    const SizedBox(height: 16),
+                     // New Field: Title
                     TextFormField(
-                      controller: _cubit.firstNameController,
+                      controller: _cubit.titleController,
                       decoration: getFieldDecoration(
                         context: context,
-                        labelText: 'First Name',
-                        hintText: 'Enter your first name',
-                        successText: state.firstNameSuccess,
+                        labelText: 'Title',
+                        hintText: 'Enter ticket title',
+                        successText: state.titleSuccess,
                       ),
                       textInputAction: TextInputAction.next,
                       onChanged: (_) => _cubit.validateFields(),
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _cubit.lastNameController,
-                      decoration: getFieldDecoration(
-                        context: context,
-                        labelText: 'Last Name',
-                        hintText: 'Enter your last name',
-                        successText: state.lastNameSuccess,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (_) => _cubit.validateFields(),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _cubit.emailController,
-                      decoration: getFieldDecoration(
-                        context: context,
-                        labelText: 'Email',
-                        hintText: 'Enter your email',
-                        successText: state.emailSuccess,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      onChanged: (_) => _cubit.validateFields(),
-                    ),
-                    const SizedBox(height: 16),
+
 
                     // New Dropdown: Services
                     DropdownButtonFormField<ServiceModel>(
@@ -161,45 +142,11 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // New Field: Title
-                    TextFormField(
-                      controller: _cubit.titleController,
-                      decoration: getFieldDecoration(
-                        context: context,
-                        labelText: 'Title',
-                        hintText: 'Enter ticket title',
-                        successText: state.titleSuccess,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (_) => _cubit.validateFields(),
-                    ),
+                   
+                  
                     const SizedBox(height: 16),
 
-                    // Department Dropdown
-                    DropdownButtonFormField<String>(
-                      value: _cubit.departmentController.text.isEmpty
-                          ? null
-                          : _cubit.departmentController.text,
-                      decoration: getFieldDecoration(
-                        context: context,
-                        labelText: 'Department',
-                        hintText: 'Select department',
-                        successText: state.departmentSuccess,
-                      ),
-                      items: ['IT', 'Software', 'Hardware'].map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        _cubit.departmentController.text = newValue ?? '';
-                        _cubit.validateFields();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Description Field
+                   // Description Field
                     TextFormField(
                       controller: _cubit.descriptionController,
                       decoration: getFieldDecoration(

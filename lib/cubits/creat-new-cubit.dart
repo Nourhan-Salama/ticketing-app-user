@@ -6,10 +6,7 @@ import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/models/service-model.dart';
 
 class CreateNewCubit extends Cubit<CreateNewState> {
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController departmentController = TextEditingController();
+
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController serviceController = TextEditingController();
@@ -22,10 +19,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   }
 
   void _setupListeners() {
-    firstNameController.addListener(_debouncedValidation);
-    lastNameController.addListener(_debouncedValidation);
-    emailController.addListener(_debouncedValidation);
-    departmentController.addListener(_debouncedValidation);
+ 
     descriptionController.addListener(_debouncedValidation);
     titleController.addListener(_debouncedValidation);
     serviceController.addListener(_debouncedValidation);
@@ -39,54 +33,23 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   }
 
   void validateFields() {
-    final firstName = firstNameController.text.trim();
-    final lastName = lastNameController.text.trim();
-    final email = emailController.text.trim();
-    final department = departmentController.text.trim();
+  
     final description = descriptionController.text.trim();
     final title = titleController.text.trim();
 
     var newState = state.copyWith(
-      firstNameError: null,
-      lastNameError: null,
-      emailError: null,
-      descriptionError: null,
-      departmentError: null,
+   
+       descriptionError: null,
+   
       titleError: null,
       serviceError: null,
-      firstNameSuccess: null,
-      lastNameSuccess: null,
-      emailSuccess: null,
+    
       descriptionSuccess: null,
-      departmentSuccess: null,
+   
       titleSuccess: null,
       serviceSuccess: null,
     );
 
-    if (firstName.isEmpty || firstName.length < 2) {
-      newState = newState.copyWith(firstNameError: 'At least 2 characters');
-    } else {
-      newState = newState.copyWith(firstNameSuccess: 'Looks good!');
-    }
-
-    if (lastName.isEmpty || lastName.length < 2) {
-      newState = newState.copyWith(lastNameError: 'At least 2 characters');
-    } else {
-      newState = newState.copyWith(lastNameSuccess: 'Looks good!');
-    }
-
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (email.isEmpty || !emailRegex.hasMatch(email)) {
-      newState = newState.copyWith(emailError: 'Invalid email format');
-    } else {
-      newState = newState.copyWith(emailSuccess: 'Valid email');
-    }
-
-    if (department.isEmpty) {
-      newState = newState.copyWith(departmentError: 'Please select department');
-    } else {
-      newState = newState.copyWith(departmentSuccess: 'Selected');
-    }
 
     if (description.isEmpty || description.length < 10) {
       newState = newState.copyWith(descriptionError: 'At least 10 characters');
@@ -107,10 +70,8 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     }
 
     newState = newState.copyWith(
-      isButtonEnabled: firstName.isNotEmpty &&
-          lastName.isNotEmpty &&
-          emailRegex.hasMatch(email) &&
-          department.isNotEmpty &&
+      isButtonEnabled:
+    
           description.length >= 10 &&
           title.length >= 3 &&
           state.selectedService != null,
@@ -150,10 +111,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
 
     try {
       final response = await _ticketService.createTicket(
-        firstName: firstNameController.text.trim(),
-        lastName: lastNameController.text.trim(),
-        email: emailController.text.trim(),
-        department: departmentController.text.trim(),
+      
         description: descriptionController.text.trim(),
         title: titleController.text.trim(),
         serviceId: state.selectedService!.id.toString(),
@@ -187,10 +145,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
 
   @override
   Future<void> close() {
-    firstNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    departmentController.dispose();
+   
     descriptionController.dispose();
     titleController.dispose();
     serviceController.dispose();

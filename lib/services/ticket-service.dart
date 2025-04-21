@@ -14,10 +14,7 @@ class TicketService {
   }
 
   Future<Map<String, dynamic>> createTicket({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String department,
+  
     required String description,
     required String title,
     required String serviceId,
@@ -33,10 +30,7 @@ class TicketService {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'department': department,
+        
         'description': description,
         'title': title,
         'service_id': serviceId,
@@ -87,26 +81,30 @@ class TicketService {
   }
 
   // Add this method to your TicketService class
-Future<List<TicketModel>> getAllTickets() async {
-  final token = await _getToken();
-  final url = Uri.parse(baseUrl);
+  Future<Map<String, dynamic>> getPaginatedTickets(int page) async {
+    final token = await _getToken();
+    final url = Uri.parse('$baseUrl?page=$page');
 
-  final response = await http.get(
-    url,
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
-    },
-  );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
 
-  if (response.statusCode == 200) {
-    final json = jsonDecode(response.body);
-    final List<dynamic> data = json['data'];
-    return data.map((ticket) => TicketModel.fromJson(ticket)).toList();
-  } else {
-    throw Exception('Failed to load tickets: ${response.statusCode}');
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return {
+        'tickets': (json['data'] as List).map((t) => TicketModel.fromJson(t)).toList(),
+        'current_page': json['meta']['current_page'],
+        'last_page': json['meta']['last_page'],
+        'total': json['meta']['total'],
+      };
+    } else {
+      throw Exception('Failed to load tickets: ${response.statusCode}');
+    }
   }
-}
 
  Future<TicketDetailsModel> getTicketDetails(int ticketId) async {
   final token = await _getToken();
