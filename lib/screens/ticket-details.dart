@@ -89,7 +89,7 @@ class TicketDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Ticket Title (aligned with the rest)
+            // Title (aligned with the rest)
             Text(
               ticket.title,
               style: const TextStyle(

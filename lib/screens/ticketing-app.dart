@@ -1,8 +1,10 @@
 import 'package:final_app/Helper/enum-helper.dart';
+import 'package:final_app/cubits/notifications-cubit.dart';
 import 'package:final_app/screens/chande-password.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
+import 'package:final_app/services/notifications-services.dart';
 import 'package:final_app/services/service-profile.dart';
 import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/services/verify_user_auth.dart';
@@ -59,7 +61,8 @@ class TicketingApp extends StatelessWidget {
           ),
         ),
         RepositoryProvider(create: (_) => SendForgetPassApi()),
-        RepositoryProvider(create: (_)=> TicketService())
+        RepositoryProvider(create: (_)=> TicketService()),
+        RepositoryProvider(create: (_) => NotificationService()),
       ],
       child: Builder(
         builder: (context) {
@@ -76,6 +79,7 @@ class TicketingApp extends StatelessWidget {
               ),
               BlocProvider(create: (_) => SignUpCubit()),
               BlocProvider(create: (_) => ChangePasswordCubit()),
+              BlocProvider(create: (context) => NotificationsCubit(context.read<NotificationService>())),
             ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,

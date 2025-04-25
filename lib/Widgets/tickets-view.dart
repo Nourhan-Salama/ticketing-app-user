@@ -1,5 +1,4 @@
 // tickets-view.dart
-import 'package:final_app/cubits/ticket-state.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/screens/ticket-details.dart';
 import 'package:final_app/services/ticket-service.dart';
@@ -53,7 +52,7 @@ class _TicketsListState extends State<TicketsList> {
       case 1:
         return 'In Progress';
       case 2:
-        return 'Resolved';
+        return '';
       case 3:
         return 'Closed';
       default:
@@ -129,6 +128,7 @@ class _TicketsListState extends State<TicketsList> {
                     }
                   },
                   child: DataTableWidget(
+                    
                     title: ticket.title,
                     userName: ticket.user.name,
                     status: _getStatusText(ticket.status),

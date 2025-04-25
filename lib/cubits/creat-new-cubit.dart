@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:final_app/models/ticket-model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/cubits/create-new-state.dart';
@@ -6,7 +7,6 @@ import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/models/service-model.dart';
 
 class CreateNewCubit extends Cubit<CreateNewState> {
-
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController serviceController = TextEditingController();
@@ -19,7 +19,6 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   }
 
   void _setupListeners() {
- 
     descriptionController.addListener(_debouncedValidation);
     titleController.addListener(_debouncedValidation);
     serviceController.addListener(_debouncedValidation);
@@ -33,23 +32,17 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   }
 
   void validateFields() {
-  
     final description = descriptionController.text.trim();
     final title = titleController.text.trim();
 
     var newState = state.copyWith(
-   
-       descriptionError: null,
-   
+      descriptionError: null,
       titleError: null,
       serviceError: null,
-    
       descriptionSuccess: null,
-   
       titleSuccess: null,
       serviceSuccess: null,
     );
-
 
     if (description.isEmpty || description.length < 10) {
       newState = newState.copyWith(descriptionError: 'At least 10 characters');
@@ -70,9 +63,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     }
 
     newState = newState.copyWith(
-      isButtonEnabled:
-    
-          description.length >= 10 &&
+      isButtonEnabled: description.length >= 10 &&
           title.length >= 3 &&
           state.selectedService != null,
     );
@@ -93,6 +84,18 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     }
   }
 
+  void loadTicket(TicketModel ticket) {
+    titleController.text = ticket.title;
+    descriptionController.text = ticket.description;
+    serviceController.text = ticket.service?.name ?? ''; // Assuming service is part of the ticket model
+    emit(state.copyWith(
+      selectedService: ticket.service,
+      titleSuccess: ticket.title,
+      descriptionSuccess: ticket.description,
+      isButtonEnabled: ticket.title.isNotEmpty && ticket.description.isNotEmpty && ticket.service != null,
+    ));
+  }
+
   void selectService(ServiceModel? service) {
     if (service != null) {
       serviceController.text = service.name;
@@ -111,7 +114,6 @@ class CreateNewCubit extends Cubit<CreateNewState> {
 
     try {
       final response = await _ticketService.createTicket(
-      
         description: descriptionController.text.trim(),
         title: titleController.text.trim(),
         serviceId: state.selectedService!.id.toString(),
@@ -145,7 +147,6 @@ class CreateNewCubit extends Cubit<CreateNewState> {
 
   @override
   Future<void> close() {
-   
     descriptionController.dispose();
     titleController.dispose();
     serviceController.dispose();
@@ -153,5 +154,3 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     return super.close();
   }
 }
-
-

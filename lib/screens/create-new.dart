@@ -1,8 +1,7 @@
-//correct without api
-
 import 'package:final_app/cubits/creat-new-cubit.dart';
 import 'package:final_app/cubits/create-new-state.dart';
 import 'package:final_app/models/service-model.dart';
+import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +9,9 @@ import 'package:final_app/Helper/app-bar.dart';
 
 class CreateNewScreen extends StatefulWidget {
   static const routeName = '/create-new';
+  final TicketModel? ticket;
+
+  const CreateNewScreen({super.key, this.ticket});
 
   @override
   _CreateNewScreenState createState() => _CreateNewScreenState();
@@ -23,6 +25,11 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
   void initState() {
     super.initState();
     _cubit = CreateNewCubit();
+
+    // If ticket data is provided, load it for editing
+    if (widget.ticket != null) {
+      _cubit.loadTicket(widget.ticket!);
+    }
   }
 
   @override
@@ -101,11 +108,8 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                 key: _formKey,
                 child: ListView(
                   children: [
-                  
-                   
-              
                     const SizedBox(height: 16),
-                     // New Field: Title
+                    // New Field: Title
                     TextFormField(
                       controller: _cubit.titleController,
                       decoration: getFieldDecoration(
@@ -118,7 +122,6 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                       onChanged: (_) => _cubit.validateFields(),
                     ),
                     const SizedBox(height: 16),
-
 
                     // New Dropdown: Services
                     DropdownButtonFormField<ServiceModel>(
@@ -142,11 +145,9 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                   
-                  
                     const SizedBox(height: 16),
 
-                   // Description Field
+                    // Description Field
                     TextFormField(
                       controller: _cubit.descriptionController,
                       decoration: getFieldDecoration(
@@ -199,3 +200,4 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
     );
   }
 }
+

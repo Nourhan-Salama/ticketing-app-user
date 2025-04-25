@@ -1,8 +1,11 @@
+import 'package:final_app/models/ticket-model.dart';
+import 'package:final_app/screens/create-new.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 
-class DataTableWidget extends StatelessWidget {
+class DataTableWidget extends StatefulWidget {
+  final TicketModel? ticket;
   final String title;
   final String userName;
   final String status;
@@ -10,6 +13,7 @@ class DataTableWidget extends StatelessWidget {
   final bool showDivider;
 
   const DataTableWidget({
+    this.ticket,
     super.key,
     required this.title,
     required this.userName,
@@ -19,125 +23,193 @@ class DataTableWidget extends StatelessWidget {
   });
 
   @override
+  State<DataTableWidget> createState() => _DataTableWidgetState();
+}
+
+class _DataTableWidgetState extends State<DataTableWidget> {
+  // Create a GlobalKey for this widget
+  final GlobalKey _popupKey = GlobalKey();
+
+  Future<void> _handleEditPressed() async {
+
+    if (widget.ticket == null) {
+      // Use the key's current context to show snackbar
+      if (_popupKey.currentContext != null && mounted) {
+        ScaffoldMessenger.of(_popupKey.currentContext!).showSnackBar(
+          const SnackBar(content: Text('⚠️ Ticket not found.')),
+        );
+      }
+      return;
+    }
+
+    // Use the key's current context for navigation
+    if (_popupKey.currentContext != null && mounted) {
+      await Navigator.of(_popupKey.currentContext!).push(
+        MaterialPageRoute(
+          builder: (_) => CreateNewScreen(ticket: widget.ticket),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveHelper.isMobile(context);
     final textScale = ResponsiveHelper.textScaleFactor(context);
 
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: ResponsiveHelper.responsiveTextSize(
-                    context,
-                    isMobile ? 14 : 16,
-                  ) * textScale,
-                  color: Colors.black87,
+    return KeyedSubtree(
+      key: _popupKey, // Assign the GlobalKey here
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: ResponsiveHelper.responsiveTextSize(
+                          context,
+                          isMobile ? 14 : 16,
+                        ) *
+                        textScale,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-              SizedBox(height: ResponsiveHelper.responsiveValue(
-                context: context,
-                mobile: 4,
-                tablet: 6,
-                desktop: 8,
-              )),
-              Row(
-                children: [
-                  Icon(
-                    Icons.person_outline,
-                    color: ColorsHelper.LightGrey,
-                    size: ResponsiveHelper.responsiveValue(
-                      context: context,
-                      mobile: 14,
-                      tablet: 16,
-                      desktop: 18,
-                    ),
-                  ),
-                  SizedBox(width: ResponsiveHelper.responsiveValue(
-                    context: context,
-                    mobile: 4,
-                    tablet: 6,
-                    desktop: 8,
-                  )),
-                  Text(
-                    userName,
-                    style: TextStyle(
+                SizedBox(
+                    height: ResponsiveHelper.responsiveValue(
+                  context: context,
+                  mobile: 4,
+                  tablet: 6,
+                  desktop: 8,
+                )),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline,
                       color: ColorsHelper.LightGrey,
-                      fontSize: ResponsiveHelper.responsiveTextSize(
-                        context,
-                        isMobile ? 12 : 14,
-                      ) * textScale,
+                      size: ResponsiveHelper.responsiveValue(
+                        context: context,
+                        mobile: 14,
+                        tablet: 16,
+                        desktop: 18,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ResponsiveHelper.responsiveValue(
-                context: context,
-                mobile: 8,
-                tablet: 12,
-                desktop: 16,
-              ),
-              vertical: ResponsiveHelper.responsiveValue(
-                context: context,
-                mobile: 4,
-                tablet: 6,
-                desktop: 8,
-              ),
+                    SizedBox(
+                        width: ResponsiveHelper.responsiveValue(
+                      context: context,
+                      mobile: 4,
+                      tablet: 6,
+                      desktop: 8,
+                    )),
+                    Text(
+                      widget.userName,
+                      style: TextStyle(
+                        color: ColorsHelper.LightGrey,
+                        fontSize: ResponsiveHelper.responsiveTextSize(
+                              context,
+                              isMobile ? 12 : 14,
+                            ) *
+                            textScale,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(
-                ResponsiveHelper.responsiveValue(
+          ),
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveHelper.responsiveValue(
                   context: context,
                   mobile: 8,
-                  tablet: 10,
-                  desktop: 12,
+                  tablet: 12,
+                  desktop: 16,
+                ),
+                vertical: ResponsiveHelper.responsiveValue(
+                  context: context,
+                  mobile: 4,
+                  tablet: 6,
+                  desktop: 8,
                 ),
               ),
-            ),
-            child: Center(
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: statusColor,
-                  fontSize: ResponsiveHelper.responsiveTextSize(
-                    context,
-                    isMobile ? 12 : 14,
-                  ) * textScale,
-                  fontWeight: FontWeight.w600,
+              decoration: BoxDecoration(
+                color: widget.statusColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveHelper.responsiveValue(
+                    context: context,
+                    mobile: 8,
+                    tablet: 10,
+                    desktop: 12,
+                  ),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  widget.status,
+                  style: TextStyle(
+                    color: widget.statusColor,
+                    fontSize: ResponsiveHelper.responsiveTextSize(
+                          context,
+                          isMobile ? 12 : 14,
+                        ) *
+                        textScale,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 1,
-          child: IconButton(
-            icon: Icon(Icons.more_vert,
+          Expanded(
+            flex: 1,
+            child: PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
                 size: ResponsiveHelper.responsiveValue(
                   context: context,
                   mobile: 18,
                   tablet: 20,
                   desktop: 22,
-                )),
-            color: Colors.black,
-            onPressed: () {},
+                ),
+                color: Colors.black,
+              ),
+              onSelected: (value) async {
+                if (value == 'edit') {
+                  await _handleEditPressed();
+                } else if (value == 'delete') {
+                  // Handle delete action
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: Colors.black54),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.redAccent),
+                      SizedBox(width: 8),
+                      Text('Delete'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

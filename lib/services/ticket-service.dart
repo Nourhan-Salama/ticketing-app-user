@@ -14,7 +14,6 @@ class TicketService {
   }
 
   Future<Map<String, dynamic>> createTicket({
-  
     required String description,
     required String title,
     required String serviceId,
@@ -30,7 +29,6 @@ class TicketService {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
-        
         'description': description,
         'title': title,
         'service_id': serviceId,
@@ -39,6 +37,49 @@ class TicketService {
 
     final json = jsonDecode(response.body);
     if (response.statusCode == 201) {
+      return {
+        'success': true,
+        'data': json['data'],
+        'message': json['message'],
+      };
+    } else if (response.statusCode == 422) {
+      return {
+        'success': false,
+        'message': json['message'] ?? 'Validation error',
+      };
+    } else {
+      return {
+        'success': false,
+        'message': json['message'] ?? 'Something went wrong',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> updateTicket({
+    required int ticketId,
+    required String description,
+    required String title,
+    required String serviceId,
+  }) async {
+    final token = await _getToken();
+    final url = Uri.parse('$baseUrl/$ticketId');
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'description': description,
+        'title': title,
+        'service_id': serviceId,
+      },
+    );
+
+    final json = jsonDecode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return {
         'success': true,
         'data': json['data'],
@@ -80,7 +121,6 @@ class TicketService {
     }
   }
 
-  // Add this method to your TicketService class
   Future<Map<String, dynamic>> getPaginatedTickets(int page) async {
     final token = await _getToken();
     final url = Uri.parse('$baseUrl?page=$page');
@@ -106,23 +146,23 @@ class TicketService {
     }
   }
 
- Future<TicketDetailsModel> getTicketDetails(int ticketId) async {
-  final token = await _getToken();
-  final url = Uri.parse('$baseUrl/$ticketId');
+  Future<TicketDetailsModel> getTicketDetails(int ticketId) async {
+    final token = await _getToken();
+    final url = Uri.parse('$baseUrl/$ticketId');
 
-  final response = await http.get(
-    url,
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
-    },
-  );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
 
-  if (response.statusCode == 200) {
-    final json = jsonDecode(response.body);
-    return TicketDetailsModel.fromJson(json['data']);
-  } else {
-    throw Exception('Failed to load ticket details: ${response.statusCode}');
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return TicketDetailsModel.fromJson(json['data']);
+    } else {
+      throw Exception('Failed to load ticket details: ${response.statusCode}');
+    }
   }
-}
 }
