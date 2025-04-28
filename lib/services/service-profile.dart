@@ -23,7 +23,6 @@ class ProfileService {
     }
   }
 
-  // Get profile from API
   Future<Map<String, dynamic>> getProfile() async {
     final token = await _getAccessToken();
     if (token == null) throw Exception('User not authenticated');
@@ -49,16 +48,13 @@ class ProfileService {
   }
 
   Future<void> saveImagePath(String path) async {
-    final storage = const FlutterSecureStorage();
-    await storage.write(key: 'image_path', value: path);
+    await secureStorage.write(key: 'image_path', value: path);
   }
 
   Future<void> removeUserImage() async {
-    final storage = FlutterSecureStorage();
-    await storage.delete(key: 'imagePath');
+    await secureStorage.delete(key: 'imagePath');
   }
 
-  // Update profile with name, email, and optional avatar
   Future<Map<String, dynamic>> updateProfile({
     required String firstName,
     required String lastName,
@@ -102,7 +98,6 @@ class ProfileService {
     }
   }
 
-  // Save user data in secure storage
   Future<void> saveUserData({
     required String firstName,
     required String lastName,
@@ -116,7 +111,6 @@ class ProfileService {
     }
   }
 
-  // Load saved user data
   Future<Map<String, String?>> loadUserData() async {
     return {
       'name': await secureStorage.read(key: 'user_name'),
@@ -125,7 +119,6 @@ class ProfileService {
     };
   }
 
-  // Clear local user data
   Future<void> clearUserData() async {
     await secureStorage.delete(key: 'user_name');
     await secureStorage.delete(key: 'user_email');

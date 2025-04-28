@@ -9,9 +9,13 @@ import 'package:final_app/models/service-model.dart';
 class CreateNewCubit extends Cubit<CreateNewState> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController serviceController = TextEditingController();
+  //final TextEditingController serviceController = TextEditingController();
 
   final TicketService _ticketService = TicketService();
+   Timer? _debounceTimer;
+  
+  // Add ticket ID to track edit mode
+  int? ticketId;
 
   CreateNewCubit() : super(CreateNewState.initial()) {
     _setupListeners();
@@ -21,10 +25,34 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   void _setupListeners() {
     descriptionController.addListener(_debouncedValidation);
     titleController.addListener(_debouncedValidation);
-    serviceController.addListener(_debouncedValidation);
+   // serviceController.addListener(_debouncedValidation);
+  }
+  
+    void loadTicket(TicketModel ticket) {
+    titleController.text = ticket.title;
+    descriptionController.text = ticket.description;
+
+    final service = state.services.firstWhere(
+      (s) => s.id == ticket.service.id,
+      orElse: () => throw Exception('Service not found'),
+    );
+    
+    selectService(service);
+    validateFields();
   }
 
-  Timer? _debounceTimer;
+    Future<void> loadServices() async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      final services = await _ticketService.fetchServices();
+      emit(state.copyWith(services: services, isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoading: false,
+        submissionError: 'Failed to load services: $e',
+      ));
+    }
+  }
 
   void _debouncedValidation() {
     _debounceTimer?.cancel();
@@ -71,34 +99,50 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     emit(newState);
   }
 
-  Future<void> loadServices() async {
-    try {
-      emit(state.copyWith(isLoading: true));
-      final services = await _ticketService.fetchServices();
-      emit(state.copyWith(services: services, isLoading: false));
-    } catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        submissionError: 'Failed to load services: $e',
-      ));
-    }
-  }
+  // Future<void> loadServices() async {
+  //   try {
+  //     emit(state.copyWith(isLoading: true));
+  //     final services = await _ticketService.fetchServices();
+  //     emit(state.copyWith(services: services, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(
+  //       isLoading: false,
+  //       submissionError: 'Failed to load services: $e',
+  //     ));
+  //   }
+  // }
 
-  void loadTicket(TicketModel ticket) {
-    titleController.text = ticket.title;
-    descriptionController.text = ticket.description;
-    serviceController.text = ticket.service?.name ?? ''; // Assuming service is part of the ticket model
-    emit(state.copyWith(
-      selectedService: ticket.service,
-      titleSuccess: ticket.title,
-      descriptionSuccess: ticket.description,
-      isButtonEnabled: ticket.title.isNotEmpty && ticket.description.isNotEmpty && ticket.service != null,
-    ));
-  }
+  // void loadTicket(TicketModel ticket) {
+  //   // Store ticket ID for update operations
+  //   ticketId = ticket.id;
+    
+  //   titleController.text = ticket.title;
+  //   descriptionController.text = ticket.description;
+    
+  //   // Find matching service in our services list
+  //   if (state.services.isNotEmpty) {
+  //     try {
+  //       final matchingService = state.services.firstWhere(
+  //         (s) => s.id == ticket.service.id,
+  //       );
+  //      // serviceController.text = matchingService.name;
+  //       emit(state.copyWith(selectedService: matchingService));
+  //     } catch (e) {
+  //       // If no match is found, use the first service as fallback
+  //       if (state.services.isNotEmpty) {
+  //         final defaultService = state.services.first;
+  //        // serviceController.text = defaultService.name;
+  //         emit(state.copyWith(selectedService: defaultService));
+  //       }
+  //     }
+  //   }
+    
+  //   validateFields();
+  // }
 
   void selectService(ServiceModel? service) {
     if (service != null) {
-      serviceController.text = service.name;
+     
       emit(state.copyWith(selectedService: service));
       validateFields();
     }
@@ -113,35 +157,38 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      final response = await _ticketService.createTicket(
-        description: descriptionController.text.trim(),
-        title: titleController.text.trim(),
-        serviceId: state.selectedService!.id.toString(),
-      );
+      final Map<String, dynamic> response;
+      
+      if (ticketId != null) {
+        // We're updating an existing ticket
+        response = await _ticketService.updateTicket(
+          ticketId: ticketId!,
+          description: descriptionController.text.trim(),
+          title: titleController.text.trim(),
+          serviceId: state.selectedService!.id.toString(),
+        );
+      } else {
+        // We're creating a new ticket
+        response = await _ticketService.createTicket(
+          description: descriptionController.text.trim(),
+          title: titleController.text.trim(),
+          serviceId: state.selectedService!.id.toString(),
+        );
+      }
 
       if (response['success']) {
         emit(state.copyWith(isLoading: false, isSuccess: true));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ticket created successfully')),
-        );
-        Navigator.pushReplacementNamed(context, '/all-tickets');
       } else {
         emit(state.copyWith(
           isLoading: false,
-          submissionError: response['message'] ?? 'Failed to create ticket',
+          submissionError: response['message'] ?? 'Failed to process ticket',
         ));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Unknown error')),
-        );
       }
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
         submissionError: 'Submission failed: ${e.toString()}',
       ));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
     }
   }
 
@@ -149,7 +196,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   Future<void> close() {
     descriptionController.dispose();
     titleController.dispose();
-    serviceController.dispose();
+    
     _debounceTimer?.cancel();
     return super.close();
   }

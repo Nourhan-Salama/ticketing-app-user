@@ -25,9 +25,9 @@ class ProfileLoaded extends ProfileState {
   final String? firstNameSuccess;
   final String? lastNameSuccess;
   final String? emailSuccess;
-  final bool isLoading;
   final bool isSuccess;
   final bool isButtonEnabled;
+  final bool isSaving;
 
   const ProfileLoaded({
     this.firstName = '',
@@ -42,10 +42,12 @@ class ProfileLoaded extends ProfileState {
     this.firstNameSuccess,
     this.lastNameSuccess,
     this.emailSuccess,
-    this.isLoading = false,
     this.isSuccess = false,
     this.isButtonEnabled = false,
+    this.isSaving = false,
   });
+
+  String get fullName => '$firstName $lastName'.trim();
 
   ProfileLoaded copyWith({
     String? firstName,
@@ -60,9 +62,9 @@ class ProfileLoaded extends ProfileState {
     String? firstNameSuccess,
     String? lastNameSuccess,
     String? emailSuccess,
-    bool? isLoading,
     bool? isSuccess,
     bool? isButtonEnabled,
+    bool? isSaving,
   }) {
     return ProfileLoaded(
       firstName: firstName ?? this.firstName,
@@ -77,9 +79,9 @@ class ProfileLoaded extends ProfileState {
       firstNameSuccess: firstNameSuccess ?? this.firstNameSuccess,
       lastNameSuccess: lastNameSuccess ?? this.lastNameSuccess,
       emailSuccess: emailSuccess ?? this.emailSuccess,
-      isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
       isButtonEnabled: isButtonEnabled ?? this.isButtonEnabled,
+      isSaving: isSaving ?? this.isSaving,
     );
   }
 
@@ -97,9 +99,9 @@ class ProfileLoaded extends ProfileState {
         firstNameSuccess,
         lastNameSuccess,
         emailSuccess,
-        isLoading,
         isSuccess,
         isButtonEnabled,
+        isSaving,
       ];
 }
 
@@ -110,6 +112,4 @@ class ProfileError extends ProfileState {
   @override
   List<Object> get props => [message];
 }
-
-
 

@@ -6,19 +6,26 @@ import 'package:final_app/services/service-profile.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileService profileService;
+  late final TextEditingController firstNameController;
+  late final TextEditingController lastNameController;
+  late final TextEditingController emailController;
+
+  File? selectedImage;
 
   ProfileCubit(this.profileService) : super(ProfileInitial()) {
-    firstNameController.addListener(validateFields);
-    lastNameController.addListener(validateFields);
-    emailController.addListener(validateFields);
+    _initializeControllers();
     loadProfile();
   }
 
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  void _initializeControllers() {
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    emailController = TextEditingController();
 
-  File? selectedImage;
+    firstNameController.addListener(validateFields);
+    lastNameController.addListener(validateFields);
+    emailController.addListener(validateFields);
+  }
 
   void validateFields() {
     final firstName = firstNameController.text.trim();
@@ -44,8 +51,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       lastNameSuccess = "Looks good!";
     }
 
-    final emailRegex =
-        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     if (email.isEmpty) {
       emailError = 'Email cannot be empty';
     } else if (!emailRegex.hasMatch(email)) {
@@ -54,8 +60,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       emailSuccess = "Valid Email!";
     }
 
-    final isButtonEnabled =
-        firstNameError == null && lastNameError == null && emailError == null;
+    final isButtonEnabled = firstNameError == null && lastNameError == null && emailError == null;
 
     emit(ProfileLoaded(
       firstName: firstName,
@@ -75,25 +80,16 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   Future<void> updateImage(File? imageFile) async {
     selectedImage = imageFile;
-    if (imageFile == null) {
-      await profileService.removeUserImage();
-    }
-
-    if (state is ProfileLoaded) {
-      emit((state as ProfileLoaded).copyWith(
-        imageFile: imageFile,
-        imagePath: imageFile?.path,
-      ));
-    }
+    validateFields();
   }
 
   Future<void> saveProfile() async {
-    if (state is! ProfileLoaded || !(state as ProfileLoaded).isButtonEnabled)
-      return;
+    if (state is! ProfileLoaded || !(state as ProfileLoaded).isButtonEnabled) return;
 
-    emit((state as ProfileLoaded).copyWith(isLoading: true));
+    emit((state as ProfileLoaded).copyWith(isSaving: true));
 
     try {
+      // Update profile on server
       await profileService.updateProfile(
         firstName: (state as ProfileLoaded).firstName,
         lastName: (state as ProfileLoaded).lastName,
@@ -101,23 +97,25 @@ class ProfileCubit extends Cubit<ProfileState> {
         avatar: (state as ProfileLoaded).imageFile,
       );
 
+      // Save data locally
       await profileService.saveUserData(
         firstName: (state as ProfileLoaded).firstName,
         lastName: (state as ProfileLoaded).lastName,
         email: (state as ProfileLoaded).email,
-        imagePath: (state as ProfileLoaded).imageFile?.path ??
-            (state as ProfileLoaded).imagePath,
+        imagePath: (state as ProfileLoaded).imageFile?.path,
       );
 
       emit((state as ProfileLoaded).copyWith(
         isSuccess: true,
-        isLoading: false,
         isButtonEnabled: false,
+        isSaving: false,
       ));
     } catch (e) {
-      emit(ProfileError(e.toString()));
-      await Future.delayed(const Duration(milliseconds: 200));
-      emit((state as ProfileLoaded).copyWith(isLoading: false));
+      emit((state as ProfileLoaded).copyWith(
+        errorMessage: e.toString(),
+        isSuccess: false,
+        isSaving: false,
+      ));
     }
   }
 
@@ -131,12 +129,20 @@ class ProfileCubit extends Cubit<ProfileState> {
 
       final nameParts = fullName.split(" ");
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final lastName =
-          nameParts.length > 1 ? nameParts.sublist(1).join(" ") : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(" ") : '';
+
+      // Update controllers without triggering listeners
+      firstNameController.removeListener(validateFields);
+      lastNameController.removeListener(validateFields);
+      emailController.removeListener(validateFields);
 
       firstNameController.text = firstName;
       lastNameController.text = lastName;
       emailController.text = email;
+
+      firstNameController.addListener(validateFields);
+      lastNameController.addListener(validateFields);
+      emailController.addListener(validateFields);
 
       emit(ProfileLoaded(
         firstName: firstName,
@@ -147,31 +153,31 @@ class ProfileCubit extends Cubit<ProfileState> {
     } catch (e) {
       try {
         final localData = await profileService.loadUserData();
-        final fullName = localData['name'] ?? '';
-        final nameParts = fullName.split(' ');
-        final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-        final lastName =
-            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        final fullName = '${localData['firstName'] ?? ''} ${localData['lastName'] ?? ''}'.trim();
         final email = localData['email'] ?? '';
-        final imagePath = localData['image_path'] ?? '';
+        final imagePath = localData['imagePath'] ?? '';
 
-        firstNameController.text = firstName;
-        lastNameController.text = lastName;
+        // Update controllers without triggering listeners
+        firstNameController.removeListener(validateFields);
+        lastNameController.removeListener(validateFields);
+        emailController.removeListener(validateFields);
+
+        firstNameController.text = localData['firstName'] ?? '';
+        lastNameController.text = localData['lastName'] ?? '';
         emailController.text = email;
 
+        firstNameController.addListener(validateFields);
+        lastNameController.addListener(validateFields);
+        emailController.addListener(validateFields);
+
         emit(ProfileLoaded(
-          firstName: firstName,
-          lastName: lastName,
+          firstName: localData['firstName'] ?? '',
+          lastName: localData['lastName'] ?? '',
           email: email,
           imagePath: imagePath,
         ));
       } catch (e) {
-        emit(ProfileLoaded(
-          firstName: '',
-          lastName: '',
-          email: '',
-          imagePath: '',
-        ));
+        emit(ProfileError('Failed to load profile: $e'));
       }
     }
   }

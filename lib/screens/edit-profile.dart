@@ -25,6 +25,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize the cubit if not already initialized
+    context.read<ProfileCubit>();
   }
 
   Future<void> _pickImage(BuildContext context, ImageSource source) async {
@@ -34,13 +36,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         context.read<ProfileCubit>().updateImage(File(pickedFile.path));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to pick image: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackBar(context, 'Failed to pick image: ${e.toString()}', isError: true);
     }
+  }
+
+  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
   }
 
   @override
@@ -61,19 +67,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is ProfileLoaded && state.isSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Profile updated successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            _showSnackBar(context, 'Profile updated successfully');
+            // Reset success state after showing message
+            context.read<ProfileCubit>().emit(state.copyWith(isSuccess: false));
           } else if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            _showSnackBar(context, state.message, isError: true);
           }
         },
         builder: (context, state) {
@@ -145,19 +143,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                   SubmitButton(
                     buttonText: 'Submit',
-                    isEnabled: loadedState.isButtonEnabled && !loadedState.isLoading,
+                    isEnabled: loadedState.isButtonEnabled,
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         context.read<ProfileCubit>().saveProfile();
                       }
                     },
                   ),
-
-                  if (loadedState.isLoading)
-                    Padding(
-                      padding: EdgeInsets.only(top: verticalSpace),
-                      child: const CircularProgressIndicator(),
-                    ),
                 ],
               ),
             ),

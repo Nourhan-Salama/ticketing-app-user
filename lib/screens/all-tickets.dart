@@ -14,7 +14,6 @@ class AllTickets extends StatefulWidget {
   @override
   State<AllTickets> createState() => _AllTicketsState();
 }
-
 class _AllTicketsState extends State<AllTickets> {
   @override
   void initState() {
@@ -39,11 +38,15 @@ class _AllTicketsState extends State<AllTickets> {
           } else if (state is TicketsError) {
             return Center(child: Text(state.message));
           } else if (state is TicketsEmpty) {
-            return Center(child: Text('No tickets found'));
+            return Column(
+              children: [
+                CustomDropDownCreateButton(), // Add dropdown here too
+                Expanded(
+                  child: Center(child: Text('No tickets found')),
+                ),
+              ],
+            );
           } else if (state is TicketsLoaded) {
-            if (state.tickets.isEmpty) {
-              return Center(child: Text('No tickets to show'));
-            }
             return SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(
@@ -58,8 +61,7 @@ class _AllTicketsState extends State<AllTickets> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                        height: ResponsiveHelper.responsiveValue(
+                    SizedBox(height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
@@ -69,11 +71,9 @@ class _AllTicketsState extends State<AllTickets> {
                       decoration: InputDecoration(
                         hintText: 'Search',
                         hintStyle: TextStyle(
-                          fontSize:
-                              ResponsiveHelper.responsiveTextSize(context, 16),
+                          fontSize: ResponsiveHelper.responsiveTextSize(context, 16),
                         ),
-                        prefixIcon:
-                            Icon(Icons.search, size: isMobile ? 20 : 24),
+                        prefixIcon: Icon(Icons.search, size: isMobile ? 20 : 24),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
                             ResponsiveHelper.responsiveValue(
@@ -86,30 +86,30 @@ class _AllTicketsState extends State<AllTickets> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                        height: ResponsiveHelper.responsiveValue(
+                    SizedBox(height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
                       desktop: 32,
                     )),
                     CustomDropDownCreateButton(),
-                    SizedBox(
-                        height: ResponsiveHelper.responsiveValue(
+                    SizedBox(height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
                       desktop: 32,
                     )),
-                    TicketsList(
-                      tickets: state.tickets,
-                      hasMore: state.hasMore,
-                      currentPage: state.currentPage,
-                      lastPage: state.lastPage,
-                      isFiltered: state.isFiltered, // Added this line
-                    ),
-                    SizedBox(
-                        height: ResponsiveHelper.responsiveValue(
+                    if (state.tickets.isEmpty)
+                      Center(child: Text('No tickets to show'))
+                    else
+                      TicketsList(
+                        tickets: state.tickets,
+                        hasMore: state.hasMore,
+                        currentPage: state.currentPage,
+                        lastPage: state.lastPage,
+                        isFiltered: state.isFiltered,
+                      ),
+                    SizedBox(height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,

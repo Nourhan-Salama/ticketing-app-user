@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:final_app/models/service-model.dart';
+import 'package:final_app/models/ticket-model.dart';
 
 class CreateNewState extends Equatable {
   final String? firstNameError;
@@ -9,6 +10,8 @@ class CreateNewState extends Equatable {
   final String? departmentError;
   final String? titleError;
   final String? serviceError;
+
+   final TicketModel? ticketToLoad;
 
   final String? firstNameSuccess;
   final String? lastNameSuccess;
@@ -23,10 +26,11 @@ class CreateNewState extends Equatable {
   final bool isSuccess;
   final String? submissionError;
 
-  final List<ServiceModel> services;  // Changed to use ServiceModel
-  final ServiceModel? selectedService; // Changed to use ServiceModel
+  final List<ServiceModel> services;
+  final ServiceModel? selectedService;
 
   const CreateNewState({
+    this.ticketToLoad,
     this.departmentSuccess,
     this.emailSuccess,
     this.lastNameSuccess,
@@ -52,6 +56,7 @@ class CreateNewState extends Equatable {
   factory CreateNewState.initial() => const CreateNewState();
 
   CreateNewState copyWith({
+    TicketModel? ticketToLoad,
     String? departmentSuccess,
     String? lastNameSuccess,
     String? descriptionSuccess,
@@ -74,6 +79,7 @@ class CreateNewState extends Equatable {
     ServiceModel? selectedService,
   }) {
     return CreateNewState(
+       ticketToLoad: ticketToLoad ?? this.ticketToLoad,
       departmentSuccess: departmentSuccess ?? this.departmentSuccess,
       descriptionSuccess: descriptionSuccess ?? this.descriptionSuccess,
       emailSuccess: emailSuccess ?? this.emailSuccess,
@@ -119,5 +125,6 @@ class CreateNewState extends Equatable {
         submissionError,
         services,
         selectedService,
+        ticketToLoad,
       ];
 }
