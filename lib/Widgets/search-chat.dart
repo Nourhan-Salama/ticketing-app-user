@@ -1,8 +1,4 @@
-import 'dart:io';
-import 'package:final_app/cubits/prpfile-state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/profile-cubit.dart';
 
 class SearchChat extends StatelessWidget {
   const SearchChat({super.key});
@@ -17,26 +13,11 @@ class SearchChat extends StatelessWidget {
           /// Search Bar Row
           Row(
             children: [
-              /// Profile Image from ProfileCubit
-              BlocBuilder<ProfileCubit, ProfileState>(
-                builder: (context, state) {
-                  String? imagePath;
-                  if (state is ProfileLoaded) {
-                    imagePath = state.imagePath;
-                  }
+             CircleAvatar(
+               radius: 25,
+                backgroundImage: AssetImage('assets/icons/formal.jpg'),
+             ),
 
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: CircleAvatar(
-                      backgroundImage: (imagePath != null && imagePath.isNotEmpty)
-                          ? FileImage(File(imagePath)) as ImageProvider
-                          : const AssetImage('assets/icons/avatar.png'),
-                      radius: 25,
-                    ),
-                  );
-                },
-              ),
-              
               const SizedBox(width: 10), // Spacing
 
               /// Search Bar
@@ -68,4 +49,5 @@ class SearchChat extends StatelessWidget {
     );
   }
 }
+
 

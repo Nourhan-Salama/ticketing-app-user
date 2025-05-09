@@ -5,8 +5,7 @@ import 'screens/ticketing-app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
-   WidgetsFlutterBinding.ensureInitialized();
+
   
   // Verify secure storage works
   try {
@@ -20,6 +19,6 @@ Future<void> main() async {
     // Fallback to alternative storage if needed
   }
 
-  runApp(TicketingApp(sharedPreferences: preferences)); 
+  runApp(TicketingApp()); 
 }
 

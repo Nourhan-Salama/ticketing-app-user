@@ -38,9 +38,9 @@ import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/screens/rest-screen.dart';
 
 class TicketingApp extends StatelessWidget {
-  final SharedPreferences sharedPreferences;
+ // final SharedPreferences sharedPreferences;
 
-  const TicketingApp({super.key, required this.sharedPreferences});
+  const TicketingApp({super.key, });
 
   @override
   Widget build(BuildContext context) {

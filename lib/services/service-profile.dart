@@ -23,6 +23,7 @@ class ProfileService {
     }
   }
 
+  // Get profile from API
   Future<Map<String, dynamic>> getProfile() async {
     final token = await _getAccessToken();
     if (token == null) throw Exception('User not authenticated');
@@ -47,18 +48,20 @@ class ProfileService {
     }
   }
 
+  // Save image path consistently using the same key
   Future<void> saveImagePath(String path) async {
-    await secureStorage.write(key: 'image_path', value: path);
+    await secureStorage.write(key: 'user_image_path', value: path);
   }
 
+  // Remove user image path from storage
   Future<void> removeUserImage() async {
-    await secureStorage.delete(key: 'imagePath');
+    await secureStorage.delete(key: 'user_image_path');
   }
 
+  // Update profile with name and optional avatar
   Future<Map<String, dynamic>> updateProfile({
     required String firstName,
     required String lastName,
-    required String email,
     File? avatar,
   }) async {
     final token = await _getAccessToken();
@@ -72,9 +75,8 @@ class ProfileService {
 
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['name'] = '$firstName $lastName';
-      request.fields['email'] = email;
 
-      if (avatar != null) {
+      if (avatar != null && avatar.existsSync()) {
         request.files.add(
           await http.MultipartFile.fromPath(
             'avatar',
@@ -84,11 +86,15 @@ class ProfileService {
         );
       }
 
-      final response = await request.send();
-      final responseString = await response.stream.bytesToString();
-      final responseData = json.decode(responseString);
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final responseData = json.decode(response.body);
 
       if (response.statusCode == 200) {
+        // If successful, save the image path locally
+        if (avatar != null) {
+          await saveImagePath(avatar.path);
+        }
         return responseData['data'] ?? {};
       } else {
         throw Exception('Update failed: ${responseData['message']}');
@@ -98,30 +104,29 @@ class ProfileService {
     }
   }
 
+  // Save user data in secure storage
   Future<void> saveUserData({
     required String firstName,
     required String lastName,
-    required String email,
     String? imagePath,
   }) async {
     await secureStorage.write(key: 'user_name', value: '$firstName $lastName');
-    await secureStorage.write(key: 'user_email', value: email);
     if (imagePath != null) {
       await secureStorage.write(key: 'user_image_path', value: imagePath);
     }
   }
 
+  // Load saved user data
   Future<Map<String, String?>> loadUserData() async {
     return {
       'name': await secureStorage.read(key: 'user_name'),
-      'email': await secureStorage.read(key: 'user_email'),
       'image_path': await secureStorage.read(key: 'user_image_path'),
     };
   }
 
+  // Clear local user data
   Future<void> clearUserData() async {
     await secureStorage.delete(key: 'user_name');
-    await secureStorage.delete(key: 'user_email');
     await secureStorage.delete(key: 'user_image_path');
   }
 }

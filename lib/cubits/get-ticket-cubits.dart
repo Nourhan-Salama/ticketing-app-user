@@ -103,4 +103,32 @@ class TicketsCubit extends Cubit<TicketsState> {
       isFiltered: _isFiltered,
     ));
   }
+
+  /// search tickets method 
+  void searchTickets(String query) {
+  if (query.isEmpty) {
+    _isFiltered = false;
+    emit(TicketsLoaded(
+      tickets: _allTickets,
+      hasMore: _currentPage < _lastPage,
+      currentPage: _currentPage,
+      lastPage: _lastPage,
+      isFiltered: false,
+    ));
+  } else {
+    _isFiltered = true;
+    _filteredTickets = _allTickets.where((ticket) =>
+      ticket.title.toLowerCase().contains(query.toLowerCase())
+    ).toList();
+
+    emit(TicketsLoaded(
+      tickets: _filteredTickets,
+      hasMore: false,
+      currentPage: 1,
+      lastPage: 1,
+      isFiltered: true,
+    ));
+  }
+}
+
 }

@@ -1,18 +1,12 @@
-import 'dart:async';
-import 'dart:io';
-import 'package:final_app/cubits/prpfile-state.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:final_app/cubits/profile-cubit.dart';
-import 'package:final_app/screens/login.dart';
-import 'package:final_app/services/logout-service.dart';
-import 'package:final_app/util/colors.dart';
 import 'package:final_app/Helper/text-icon-button.dart';
 import 'package:final_app/screens/all-tickets.dart';
 import 'package:final_app/screens/chat-page.dart';
-import 'package:final_app/screens/edit-profile.dart';
+import 'package:final_app/screens/login.dart';
 import 'package:final_app/screens/user-dashboard.dart';
+import 'package:final_app/services/logout-service.dart';
+import 'package:final_app/util/colors.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -22,81 +16,40 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  final _storage = FlutterSecureStorage();
-  StreamSubscription? _profileSubscription;
-  String name = 'Hello Guest';
-  String email = '';
-  String? imagePath;
+  String? userName;
+  String? userEmail;
+  bool isUserInfoLoading = true;
+
+  final AssetImage userAvatar = const AssetImage('assets/icons/formal.jpg');
 
   @override
   void initState() {
     super.initState();
-    _loadInitialUserData();
+    _precacheImage();
+    _loadUserInfo();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Listen to profile changes
-    _profileSubscription = context.read<ProfileCubit>().stream.listen((state) {
-      if (state is ProfileLoaded) {
-        _updateUserData(
-          name: state.fullName,
-          email: state.email,
-          imagePath: state.imagePath,
-        );
-      }
-    });
+  Future<void> _precacheImage() async {
+    // Ensure image is preloaded into memory
+    await precacheImage(userAvatar, context);
   }
 
-  @override
-  void dispose() {
-    _profileSubscription?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _loadInitialUserData() async {
+  Future<void> _loadUserInfo() async {
+    final storage = FlutterSecureStorage();
     try {
-      final firstName = await _storage.read(key: 'firstName') ?? '';
-      final lastName = await _storage.read(key: 'lastName') ?? '';
-      final userEmail = await _storage.read(key: 'email') ?? '';
-      final userImagePath = await _storage.read(key: 'imagePath') ?? '';
+      final name = await storage.read(key: 'user_name');
+      final email = await storage.read(key: 'user_email');
 
-      final fullName = '$firstName $lastName'.trim();
-
-      if (mounted) {
-        setState(() {
-          name = fullName.isNotEmpty ? fullName : 'Hello Guest';
-          email = userEmail;
-          imagePath = userImagePath;
-        });
-      }
+      setState(() {
+        userName = name;
+        userEmail = email;
+        isUserInfoLoading = false;
+      });
     } catch (e) {
-      debugPrint('Error loading initial user data: $e');
-    }
-  }
-
-  Future<void> _updateUserData({
-    required String name,
-    required String email,
-    String? imagePath,
-  }) async {
-    try {
-      await _storage.write(key: 'firstName', value: name.split(' ').first);
-      await _storage.write(key: 'lastName', 
-          value: name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : '');
-      await _storage.write(key: 'email', value: email);
-      await _storage.write(key: 'imagePath', value: imagePath ?? '');
-
-      if (mounted) {
-        setState(() {
-          this.name = name;
-          this.email = email;
-          this.imagePath = imagePath;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error updating user data: $e');
+      print('Error loading user info: $e');
+      setState(() {
+        isUserInfoLoading = false;
+      });
     }
   }
 
@@ -113,25 +66,40 @@ class _MyDrawerState extends State<MyDrawer> {
     Navigator.pop(context);
 
     if (routeName == UserDashboard.routeName) {
-      Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        routeName,
+        (route) => false,
+      );
     } else {
       Navigator.pushNamed(context, routeName);
     }
   }
 
+  Future<void> _performLogout(BuildContext context) async {
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    final logoutService = LogoutService();
+    final result = await logoutService.logout();
+
+    if (!mounted) return;
+
+    final storage = FlutterSecureStorage();
+    final tokenAfterLogout = await storage.read(key: 'access_token');
+    final refreshTokenAfterLogout = await storage.read(key: 'refresh_token');
+
+    if (result['code'] == 200 && tokenAfterLogout == null && refreshTokenAfterLogout == null) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        LoginScreen.routeName,
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentRoute = getCurrentRoute(context);
-    final profileState = context.watch<ProfileCubit>().state;
-
-    // Update from profile state if available
-    if (profileState is ProfileLoaded) {
-      name = profileState.fullName.isNotEmpty 
-          ? profileState.fullName 
-          : 'Hello Guest';
-      email = profileState.email;
-      imagePath = profileState.imagePath;
-    }
+    String currentRoute = getCurrentRoute(context);
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -140,7 +108,7 @@ class _MyDrawerState extends State<MyDrawer> {
         child: Column(
           children: [
             const SizedBox(height: 15),
-            _buildHeader(context, name, email, imagePath),
+            _buildHeader(),
             const SizedBox(height: 40),
             TextIconButton(
               icon: Icons.dashboard,
@@ -165,29 +133,7 @@ class _MyDrawerState extends State<MyDrawer> {
               child: TextIconButton(
                 icon: Icons.logout,
                 label: 'Logout',
-                onPressed: () async {
-                  final result = await LogoutService().logout();
-                  
-                  if (!mounted) return;
-
-                  // Clear all stored user data on logout
-                  await _storage.delete(key: 'firstName');
-                  await _storage.delete(key: 'lastName');
-                  await _storage.delete(key: 'email');
-                  await _storage.delete(key: 'imagePath');
-
-                  if (result['code'] == 200) {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      LoginScreen.routeName,
-                      (route) => false,
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result['message'] ?? 'Logout failed')),
-                    );
-                  }
-                },
+                onPressed: () => _performLogout(context),
               ),
             ),
             const SizedBox(height: 20),
@@ -197,7 +143,14 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String name, String email, String? imagePath) {
+  Widget _buildHeader() {
+    if (isUserInfoLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    String name = userName ?? 'Hello Guest';
+    String email = userEmail ?? '';
+
     return Row(
       children: [
         Padding(
@@ -211,7 +164,7 @@ class _MyDrawerState extends State<MyDrawer> {
             ),
             child: CircleAvatar(
               radius: 30,
-              backgroundImage: _getImageProvider(imagePath),
+              backgroundImage: userAvatar,
             ),
           ),
         ),
@@ -235,33 +188,9 @@ class _MyDrawerState extends State<MyDrawer> {
             ],
           ),
         ),
-        IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.pushNamed(context, EditProfileScreen.routeName)
-                .then((_) => context.read<ProfileCubit>().loadProfile());
-          },
-          icon: const Icon(Icons.edit),
-          iconSize: 20,
-        ),
       ],
     );
   }
-
-  ImageProvider _getImageProvider(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) {
-      return const AssetImage('assets/icons/avatar.png');
-    }
-    
-    try {
-      final file = File(imagePath);
-      if (file.existsSync()) {
-        return FileImage(file)..evict();
-      }
-      return const AssetImage('assets/icons/avatar.png');
-    } catch (e) {
-      debugPrint('Error loading profile image: $e');
-      return const AssetImage('assets/icons/avatar.png');
-    }
-  }
 }
+
+

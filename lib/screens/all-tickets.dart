@@ -14,6 +14,7 @@ class AllTickets extends StatefulWidget {
   @override
   State<AllTickets> createState() => _AllTicketsState();
 }
+
 class _AllTicketsState extends State<AllTickets> {
   @override
   void initState() {
@@ -61,39 +62,35 @@ class _AllTicketsState extends State<AllTickets> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: ResponsiveHelper.responsiveValue(
+                    SizedBox(
+                        height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
                       desktop: 32,
                     )),
                     TextField(
+                      onChanged: (value) {
+                        context.read<TicketsCubit>().searchTickets(value);
+                      },
                       decoration: InputDecoration(
                         hintText: 'Search',
-                        hintStyle: TextStyle(
-                          fontSize: ResponsiveHelper.responsiveTextSize(context, 16),
-                        ),
-                        prefixIcon: Icon(Icons.search, size: isMobile ? 20 : 24),
+                        prefixIcon: Icon(Icons.search),
+                        
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            ResponsiveHelper.responsiveValue(
-                              context: context,
-                              mobile: 12,
-                              tablet: 16,
-                              desktop: 20,
-                            ),
-                          ),
-                        ),
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    SizedBox(height: ResponsiveHelper.responsiveValue(
+                    SizedBox(
+                        height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
                       desktop: 32,
                     )),
                     CustomDropDownCreateButton(),
-                    SizedBox(height: ResponsiveHelper.responsiveValue(
+                    SizedBox(
+                        height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,
@@ -109,7 +106,8 @@ class _AllTicketsState extends State<AllTickets> {
                         lastPage: state.lastPage,
                         isFiltered: state.isFiltered,
                       ),
-                    SizedBox(height: ResponsiveHelper.responsiveValue(
+                    SizedBox(
+                        height: ResponsiveHelper.responsiveValue(
                       context: context,
                       mobile: 16,
                       tablet: 24,

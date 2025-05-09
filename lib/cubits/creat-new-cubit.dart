@@ -99,46 +99,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     emit(newState);
   }
 
-  // Future<void> loadServices() async {
-  //   try {
-  //     emit(state.copyWith(isLoading: true));
-  //     final services = await _ticketService.fetchServices();
-  //     emit(state.copyWith(services: services, isLoading: false));
-  //   } catch (e) {
-  //     emit(state.copyWith(
-  //       isLoading: false,
-  //       submissionError: 'Failed to load services: $e',
-  //     ));
-  //   }
-  // }
-
-  // void loadTicket(TicketModel ticket) {
-  //   // Store ticket ID for update operations
-  //   ticketId = ticket.id;
-    
-  //   titleController.text = ticket.title;
-  //   descriptionController.text = ticket.description;
-    
-  //   // Find matching service in our services list
-  //   if (state.services.isNotEmpty) {
-  //     try {
-  //       final matchingService = state.services.firstWhere(
-  //         (s) => s.id == ticket.service.id,
-  //       );
-  //      // serviceController.text = matchingService.name;
-  //       emit(state.copyWith(selectedService: matchingService));
-  //     } catch (e) {
-  //       // If no match is found, use the first service as fallback
-  //       if (state.services.isNotEmpty) {
-  //         final defaultService = state.services.first;
-  //        // serviceController.text = defaultService.name;
-  //         emit(state.copyWith(selectedService: defaultService));
-  //       }
-  //     }
-  //   }
-    
-  //   validateFields();
-  // }
+ 
 
   void selectService(ServiceModel? service) {
     if (service != null) {

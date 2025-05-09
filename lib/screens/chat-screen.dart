@@ -24,7 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void connectToWebSocket() {
     channel = WebSocketChannel.connect(
-      Uri.parse(''), 
+      Uri.parse(''), // You still need to put your WebSocket server URL here.
     );
 
     channel.stream.listen((message) {
@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_messageController.text.trim().isEmpty) return;
 
     String message = _messageController.text;
-    
+
     setState(() {
       messages.add({"text": message, "isMe": true});
     });
@@ -61,9 +61,9 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage("assets/avatar.png"),
+              backgroundImage: AssetImage("assets/icons/formal.jpg"), // Correct path
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(widget.userName),
           ],
         ),
@@ -78,8 +78,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 return Align(
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: EdgeInsets.all(10),
+                    margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isMe ? Colors.blue : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
@@ -108,9 +108,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 IconButton(
-                  icon: Icon(Icons.send, color: Colors.blue),
+                  icon: const Icon(Icons.send, color: Colors.blue),
                   onPressed: sendMessage,
                 ),
               ],
