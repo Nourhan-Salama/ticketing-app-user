@@ -38,9 +38,10 @@ import 'package:final_app/screens/rest-screen.dart';
 
 class TicketingApp extends StatelessWidget {
   // final SharedPreferences sharedPreferences;
-
+ final String? accessToken;
   const TicketingApp({
     super.key,
+     this.accessToken,
   });
 
   @override
@@ -92,7 +93,7 @@ class TicketingApp extends StatelessWidget {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              initialRoute: SplashScreen.routeName,
+              initialRoute: accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
                 LoginScreen.routeName: (_) => LoginScreen(),

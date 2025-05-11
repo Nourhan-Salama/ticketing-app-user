@@ -120,6 +120,10 @@ class LoginCubit extends Cubit<LoginState> {
               key: 'remember_me',
               value: 'true',
             );
+             await secureStorage.write(
+                key: 'access_token', value: response['data']['token']);
+            await secureStorage.write(
+                key: 'refresh_token', value: response['data']['refresh_token']);
           } else {
             await secureStorage.delete(key: 'remembered_email');
             await secureStorage.delete(key: 'remembered_password');

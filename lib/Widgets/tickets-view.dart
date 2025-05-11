@@ -1,4 +1,5 @@
 // tickets-view.dart
+import 'package:final_app/Widgets/data-tabel.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/screens/ticket-details.dart';
 import 'package:final_app/services/ticket-service.dart';
@@ -6,7 +7,6 @@ import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/cubits/get-ticket-cubits.dart';
-import 'package:final_app/Widgets/data-tabel.dart';
 import 'package:final_app/util/colors.dart';
 
 class TicketsList extends StatefulWidget {
@@ -128,7 +128,7 @@ class _TicketsListState extends State<TicketsList> {
                     }
                   },
                   child: DataTableWidget(
-                    
+                    ticket: ticket,
                     title: ticket.title,
                     userName: ticket.user.name,
                     status: _getStatusText(ticket.status),
@@ -147,9 +147,12 @@ class _TicketsListState extends State<TicketsList> {
               if (widget.currentPage > 1)
                 ElevatedButton(
                   onPressed: () {
-                    context.read<TicketsCubit>().goToPage(widget.currentPage - 1);
+                    context
+                        .read<TicketsCubit>()
+                        .goToPage(widget.currentPage - 1);
                   },
-                  child: Text('Previous', style: TextStyle(color: Colors.white)),
+                  child:
+                      Text('Previous', style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsHelper.darkBlue,
                   ),
@@ -163,7 +166,9 @@ class _TicketsListState extends State<TicketsList> {
               if (widget.currentPage < widget.lastPage)
                 ElevatedButton(
                   onPressed: () {
-                    context.read<TicketsCubit>().goToPage(widget.currentPage + 1);
+                    context
+                        .read<TicketsCubit>()
+                        .goToPage(widget.currentPage + 1);
                   },
                   child: Text('Next', style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
