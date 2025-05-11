@@ -43,11 +43,10 @@ class _ResetPasswordScreenContent extends StatefulWidget {
 
 class _ResetPasswordScreenContentState
     extends State<_ResetPasswordScreenContent> {
-  final TextEditingController _emailController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
+ 
     super.dispose();
   }
 
@@ -152,7 +151,7 @@ class _ResetPasswordScreenContentState
       builder: (context, state) {
         return CustomTextField(
           label: 'Email',
-          controller: _emailController,
+          controller: context.read<ResetPasswordCubit>().emailController,
           prefixIcon: Icons.email,
           hintText: 'Enter your Email',
           keyboardType: TextInputType.emailAddress,
@@ -184,7 +183,7 @@ class _ResetPasswordScreenContentState
                 ? () {
                     context
                         .read<ResetPasswordCubit>()
-                        .resetPassword(_emailController.text);
+                        .resetPassword(context.read<ResetPasswordCubit>().emailController.text);
                   }
                 : null,
             buttonText: 'Reset Password',

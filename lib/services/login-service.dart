@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pretty_http_logger/pretty_http_logger.dart';
 
 class AuthApi {
   final String baseUrl;
@@ -14,6 +15,10 @@ class AuthApi {
   })  : client = client ?? http.Client(),
         secureStorage = storage ?? const FlutterSecureStorage();
 
+  HttpWithMiddleware httpLogger = HttpWithMiddleware.build(middlewares: [
+    HttpLogger(logLevel: LogLevel.BODY),
+  ]);
+
   Future<Map<String, dynamic>> login({
     required String handle,
     required String password,
@@ -21,7 +26,7 @@ class AuthApi {
     final url = Uri.parse('$baseUrl/auth/login');
 
     try {
-      final response = await client.post(
+      final response = await httpLogger.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': handle, 'password': password}),
@@ -146,7 +151,7 @@ class AuthApi {
         return {'code': 401, 'message': 'No access token found'};
       }
 
-      final response = await client.get(
+      final response = await httpLogger.get(
         Uri.parse('$baseUrl/$endpoint'),
         headers: {'Authorization': 'Bearer $token'},
       );
@@ -180,7 +185,7 @@ class AuthApi {
       String? refreshToken = await _getRefreshToken();
       if (refreshToken == null) return false;
 
-      final response = await client.post(
+      final response = await httpLogger.post(
         Uri.parse('$baseUrl/auth/refresh_tokens/rotate'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh_token': refreshToken}),

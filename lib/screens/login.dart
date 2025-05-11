@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/Custom-big-button.dart';
 import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/services/login-service.dart';
@@ -14,7 +15,6 @@ import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
   const LoginScreen({super.key});
@@ -28,11 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => LoginCubit(authApi: AuthApi(),
-           profileService: ProfileService(
-      client: http.Client(),  
-      secureStorage: FlutterSecureStorage(), 
-    ),),
+        create: (context) => LoginCubit(
+          authApi: AuthApi(),
+          profileService: ProfileService(
+            client: http.Client(),
+            secureStorage: FlutterSecureStorage(),
+          ),
+        ),
         child: BlocListener<LoginCubit, LoginState>(
           listener: (context, state) {
             if (state.isSuccess) {
@@ -146,6 +148,15 @@ class _LoginScreenState extends State<LoginScreen> {
           _buildSignUpLink(context),
           SizedBox(height: ResponsiveHelper.heightPercent(context, 0.03)),
           _buildSignInButton(context),
+          ElevatedButton(
+              onPressed: () {
+                if (context.locale.languageCode == 'ar') {
+                  context.setLocale(Locale('en'));
+                } else {
+                  context.setLocale(Locale('ar'));
+                }
+              },
+              child: Text("Change Language"))
         ],
       ),
     );
@@ -166,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocBuilder<LoginCubit, LoginState>(
       builder: (context, state) {
         return CustomTextField(
-          label: 'Email',
+          label: 'Email'.tr(),
           controller: context.read<LoginCubit>().emailController,
           hintText: 'Enter Your Email',
           prefixIcon: Icons.email,
@@ -225,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
         TextButton(
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>   ResetPasswordScreen()),
+            MaterialPageRoute(builder: (context) => ResetPasswordScreen()),
           ),
           child: Text(
             "Forget Password?",

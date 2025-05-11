@@ -24,14 +24,8 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   void initState() {
-    super.initState();
-    _precacheImage();
     _loadUserInfo();
-  }
-
-  Future<void> _precacheImage() async {
-    // Ensure image is preloaded into memory
-    await precacheImage(userAvatar, context);
+    super.initState();
   }
 
   Future<void> _loadUserInfo() async {
@@ -88,7 +82,9 @@ class _MyDrawerState extends State<MyDrawer> {
     final tokenAfterLogout = await storage.read(key: 'access_token');
     final refreshTokenAfterLogout = await storage.read(key: 'refresh_token');
 
-    if (result['code'] == 200 && tokenAfterLogout == null && refreshTokenAfterLogout == null) {
+    if (result['code'] == 200 &&
+        tokenAfterLogout == null &&
+        refreshTokenAfterLogout == null) {
       Navigator.pushNamedAndRemoveUntil(
         context,
         LoginScreen.routeName,
@@ -114,7 +110,8 @@ class _MyDrawerState extends State<MyDrawer> {
               icon: Icons.dashboard,
               label: 'Dashboard',
               isSelected: currentRoute == UserDashboard.routeName,
-              onPressed: () => navigateToScreen(context, UserDashboard.routeName),
+              onPressed: () =>
+                  navigateToScreen(context, UserDashboard.routeName),
             ),
             TextIconButton(
               icon: Icons.airplane_ticket,
@@ -192,5 +189,3 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 }
-
-
