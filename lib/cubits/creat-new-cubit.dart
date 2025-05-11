@@ -10,49 +10,51 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   //final TextEditingController serviceController = TextEditingController();
-
+  final formKey = GlobalKey<FormState>();
   final TicketService _ticketService = TicketService();
-   Timer? _debounceTimer;
-  
+  Timer? _debounceTimer;
+
   // Add ticket ID to track edit mode
   int? ticketId;
+  final TicketModel? ticket;
 
-  CreateNewCubit() : super(CreateNewState.initial()) {
+  CreateNewCubit({this.ticket}) : super(CreateNewState.initial()) {
     _setupListeners();
-    loadServices();
+    _ticketService.fetchServices().then((services) {
+      emit(state.copyWith(services: services));
+    });
+    if (ticket != null) {
+      loadTicket(ticket!);
+    }
   }
 
   void _setupListeners() {
     descriptionController.addListener(_debouncedValidation);
     titleController.addListener(_debouncedValidation);
-   // serviceController.addListener(_debouncedValidation);
+    // serviceController.addListener(_debouncedValidation);
   }
-  
-    void loadTicket(TicketModel ticket) {
+
+  void loadTicket(TicketModel ticket) {
     titleController.text = ticket.title;
     descriptionController.text = ticket.description;
+    ticketId = ticket.id;
 
-    final service = state.services.firstWhere(
-      (s) => s.id == ticket.service.id,
-      orElse: () => throw Exception('Service not found'),
-    );
-    
-    selectService(service);
+    // selectService(ticket.service);
     validateFields();
   }
 
-    Future<void> loadServices() async {
-    try {
-      emit(state.copyWith(isLoading: true));
-      final services = await _ticketService.fetchServices();
-      emit(state.copyWith(services: services, isLoading: false));
-    } catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        submissionError: 'Failed to load services: $e',
-      ));
-    }
-  }
+  //   Future<void> loadServices() async {
+  //   try {
+  //     emit(state.copyWith(isLoading: true));
+  //     final services = await _ticketService.fetchServices();
+  //     emit(state.copyWith(services: services, isLoading: false));
+  //   } catch (e) {
+  //     emit(state.copyWith(
+  //       isLoading: false,
+  //       submissionError: 'Failed to load services: $e',
+  //     ));
+  //   }
+  // }
 
   void _debouncedValidation() {
     _debounceTimer?.cancel();
@@ -99,19 +101,17 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     emit(newState);
   }
 
- 
-
   void selectService(ServiceModel? service) {
     if (service != null) {
-     
       emit(state.copyWith(selectedService: service));
-      validateFields();
     }
+    validateFields();
   }
 
   Future<void> submitForm(BuildContext context) async {
     if (!state.isButtonEnabled || state.selectedService == null) {
-      emit(state.copyWith(submissionError: 'Please complete all fields correctly'));
+      emit(state.copyWith(
+          submissionError: 'Please complete all fields correctly'));
       return;
     }
 
@@ -119,7 +119,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
 
     try {
       final Map<String, dynamic> response;
-      
+
       if (ticketId != null) {
         // We're updating an existing ticket
         response = await _ticketService.updateTicket(
@@ -157,7 +157,7 @@ class CreateNewCubit extends Cubit<CreateNewState> {
   Future<void> close() {
     descriptionController.dispose();
     titleController.dispose();
-    
+
     _debounceTimer?.cancel();
     return super.close();
   }

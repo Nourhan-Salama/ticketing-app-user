@@ -21,13 +21,16 @@ Future<void> main() async {
     log('❌ Secure storage failed: $e');
     // Fallback to alternative storage if needed
   }
-
+  final storage =  FlutterSecureStorage();
+  final accessToken = await storage.read(key: 'access_token');
   runApp(
     EasyLocalization(
         supportedLocales: [Locale('en'), Locale('ar')],
         path:
             'assets/translations', // <-- change the path of the translation files
         fallbackLocale: Locale('en'),
-        child: TicketingApp()),
+        child: TicketingApp(
+          accessToken: accessToken,
+        )),
   );
 }

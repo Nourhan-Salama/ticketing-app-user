@@ -7,36 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/Helper/app-bar.dart';
 
-class CreateNewScreen extends StatefulWidget {
+class CreateNewScreen extends StatelessWidget {
   static const routeName = '/create-new';
   final TicketModel? ticket;
 
   const CreateNewScreen({super.key, this.ticket});
-
-  @override
-  _CreateNewScreenState createState() => _CreateNewScreenState();
-}
-
-class _CreateNewScreenState extends State<CreateNewScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late final CreateNewCubit _cubit;
-
-   @override
-  void initState() {
-    super.initState();
-    _cubit = CreateNewCubit();
-    if (widget.ticket != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _cubit.loadTicket(widget.ticket!);
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _cubit.close();
-    super.dispose();
-  }
 
   InputDecoration getFieldDecoration({
     required BuildContext context,
@@ -84,9 +59,10 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => _cubit,
+      create: (_) => CreateNewCubit(ticket: ticket),
       child: Scaffold(
-        appBar: CustomAppBar(title: widget.ticket != null ? 'Edit Ticket' : 'Create New Ticket'),
+        appBar: CustomAppBar(
+            title: ticket != null ? 'Edit Ticket' : 'Create New Ticket'),
         body: BlocConsumer<CreateNewCubit, CreateNewState>(
           listener: (context, state) {
             if (state.submissionError != null) {
@@ -105,19 +81,20 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
-                key: _formKey,
+                key: context.read<CreateNewCubit>().formKey,
                 child: ListView(
                   children: [
                     const SizedBox(height: 16),
                     // Title Field
                     TextFormField(
-                      controller: _cubit.titleController,
+                      controller:
+                          context.read<CreateNewCubit>().titleController,
                       decoration: getFieldDecoration(
                         context: context,
                         labelText: 'Title',
                         hintText: 'Enter ticket title',
                         successText: state.titleSuccess,
-                       // errorText: state.titleError,
+                        // errorText: state.titleError,
                       ),
                       textInputAction: TextInputAction.next,
                     ),
@@ -140,14 +117,15 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                         );
                       }).toList(),
                       onChanged: (ServiceModel? newValue) {
-                        _cubit.selectService(newValue);
+                        context.read<CreateNewCubit>().selectService(newValue);
                       },
                     ),
                     const SizedBox(height: 16),
 
                     // Description Field
                     TextFormField(
-                      controller: _cubit.descriptionController,
+                      controller:
+                          context.read<CreateNewCubit>().descriptionController,
                       decoration: getFieldDecoration(
                         context: context,
                         labelText: 'Description',
@@ -156,6 +134,16 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                         //errorText: state.descriptionError,
                       ),
                       maxLines: 5,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) {
+                        if (context
+                            .read<CreateNewCubit>()
+                            .formKey
+                            .currentState!
+                            .validate()) {
+                          context.read<CreateNewCubit>().submitForm(context);
+                        }
+                      },
                     ),
                     const SizedBox(height: 24),
 
@@ -163,8 +151,14 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                     ElevatedButton(
                       onPressed: state.isButtonEnabled && !state.isLoading
                           ? () {
-                              if (_formKey.currentState!.validate()) {
-                                _cubit.submitForm(context);
+                              if (context
+                                  .read<CreateNewCubit>()
+                                  .formKey
+                                  .currentState!
+                                  .validate()) {
+                                context
+                                    .read<CreateNewCubit>()
+                                    .submitForm(context);
                               }
                             }
                           : null,
@@ -181,7 +175,9 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
                       child: state.isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              widget.ticket != null ? 'Update Ticket' : 'Submit Ticket',
+                              ticket != null
+                                  ? 'Update Ticket'
+                                  : 'Submit Ticket',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -198,4 +194,3 @@ class _CreateNewScreenState extends State<CreateNewScreen> {
     );
   }
 }
-
