@@ -26,6 +26,8 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_secure_storage: ^9.2.4
   flutter_launcher_icons: ^0.13.1
+  pretty_http_logger: ^1.0.5
+  easy_localization: ^3.0.7+1
 
 dev_dependencies:
   flutter_test:
@@ -45,3 +47,4 @@ flutter:
    - assets/icons/avatar.png
    - assets/icons/Group.png
    - assets/icons/formal.jpg
+   - assets/translations/

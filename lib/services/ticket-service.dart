@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:final_app/models/ticket-details-model.dart';
 import 'package:final_app/models/ticket-model.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:final_app/models/service-model.dart';
+import 'package:pretty_http_logger/pretty_http_logger.dart';
 
 class TicketService {
   final String baseUrl = 'https://graduation.arabic4u.org/api/users/tickets';
@@ -13,6 +13,9 @@ class TicketService {
     return await _storage.read(key: 'access_token');
   }
 
+  HttpWithMiddleware http = HttpWithMiddleware.build(middlewares: [
+    HttpLogger(logLevel: LogLevel.BODY),
+  ]);
   Future<Map<String, dynamic>> createTicket({
     required String description,
     required String title,
@@ -100,7 +103,8 @@ class TicketService {
 
   Future<List<ServiceModel>> fetchServices() async {
     final token = await _getToken();
-    final url = Uri.parse('https://graduation.arabic4u.org/api/select_menu/services');
+    final url =
+        Uri.parse('https://graduation.arabic4u.org/api/select_menu/services');
 
     final response = await http.get(
       url,
@@ -136,7 +140,8 @@ class TicketService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return {
-        'tickets': (json['data'] as List).map((t) => TicketModel.fromJson(t)).toList(),
+        'tickets':
+            (json['data'] as List).map((t) => TicketModel.fromJson(t)).toList(),
         'current_page': json['meta']['current_page'],
         'last_page': json['meta']['last_page'],
         'total': json['meta']['total'],

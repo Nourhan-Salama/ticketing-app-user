@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
 import 'package:final_app/cubits/notifications-cubit.dart';
 import 'package:final_app/screens/chande-password.dart';
@@ -11,7 +12,6 @@ import 'package:final_app/services/verify_user_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:final_app/cubits/change-pass-cubit.dart';
@@ -28,7 +28,6 @@ import 'package:final_app/services/login-service.dart';
 import 'package:final_app/services/resend-otp-api.dart';
 import 'package:final_app/services/send-forget-pass-api.dart';
 
-
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/screens/all-tickets.dart';
 import 'package:final_app/screens/chat-page.dart';
@@ -38,9 +37,11 @@ import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/screens/rest-screen.dart';
 
 class TicketingApp extends StatelessWidget {
- // final SharedPreferences sharedPreferences;
+  // final SharedPreferences sharedPreferences;
 
-  const TicketingApp({super.key, });
+  const TicketingApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,7 @@ class TicketingApp extends StatelessWidget {
           ),
         ),
         RepositoryProvider(create: (_) => SendForgetPassApi()),
-        RepositoryProvider(create: (_)=> TicketService()),
+        RepositoryProvider(create: (_) => TicketService()),
         RepositoryProvider(create: (_) => NotificationService()),
       ],
       child: Builder(
@@ -69,20 +70,28 @@ class TicketingApp extends StatelessWidget {
           return MultiBlocProvider(
             providers: [
               BlocProvider(
-                create: (context) => LoginCubit(authApi: context.read<AuthApi>()),
+                create: (context) =>
+                    LoginCubit(authApi: context.read<AuthApi>()),
               ),
               BlocProvider(create: (_) => RichTextCubit()),
-              BlocProvider(create: (_) => TicketsCubit(context.read<TicketService>())),
+              BlocProvider(
+                  create: (_) => TicketsCubit(context.read<TicketService>())),
               BlocProvider(create: (_) => CreateNewCubit()),
               BlocProvider(
-                create: (context) => ProfileCubit(context.read<ProfileService>()),
+                create: (context) =>
+                    ProfileCubit(context.read<ProfileService>()),
               ),
               BlocProvider(create: (_) => SignUpCubit()),
               BlocProvider(create: (_) => ChangePasswordCubit()),
-              BlocProvider(create: (context) => NotificationsCubit(context.read<NotificationService>())),
+              BlocProvider(
+                  create: (context) =>
+                      NotificationsCubit(context.read<NotificationService>())),
             ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
               initialRoute: SplashScreen.routeName,
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
