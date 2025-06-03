@@ -28,6 +28,9 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   pretty_http_logger: ^1.0.5
   easy_localization: ^3.0.7+1
+  firebase_messaging: ^15.2.6
+  firebase_core: ^3.13.1
+  audioplayers: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -48,3 +51,4 @@ flutter:
    - assets/icons/Group.png
    - assets/icons/formal.jpg
    - assets/translations/
+   - assets/sounds/

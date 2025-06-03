@@ -2,6 +2,7 @@ import 'package:final_app/Widgets/notifications-badge.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onPressed;
@@ -16,6 +17,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isRTL = Directionality.of(context) == TextDirection.rtl;
+    
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -34,25 +37,37 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading: Builder(
           builder: (BuildContext context) {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.only(
+                left: isRTL ? 0 : 7.0,
+                right: isRTL ? 8.0 : 0,
+              ),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Container(
-                    width: 47,
-                    height: 47,
-                    decoration: BoxDecoration(
-                      color: ColorsHelper.darkBlue,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 22,
-                      backgroundImage: AssetImage('assets/icons/formal.jpg'),
+                  InkWell(
+                    onTap: onPressed ?? () => Scaffold.of(context).openDrawer(),
+                    borderRadius: BorderRadius.circular(5),
+                    child: Container(
+                      width: 47,
+                      height: 47,
+                      margin: EdgeInsets.only(
+                        left: isRTL ? 0 : 8.0,
+                        right: isRTL ? 8.0 : 0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ColorsHelper.darkBlue,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 22,
+                        backgroundImage: AssetImage('assets/icons/formal.jpg'),
+                      ),
                     ),
                   ),
                   Positioned(
-                    bottom: -5,
-                    right: -10,
+                    bottom: 0,
+                    right: isRTL ? null : -7,
+                    left: isRTL ? -7 : null,
                     child: Material(
                       type: MaterialType.circle,
                       color: Colors.white,
@@ -99,6 +114,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
 
 
 

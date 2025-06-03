@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/screens/create-new.dart';
 import 'package:final_app/util/colors.dart';
@@ -140,7 +141,7 @@ class _DataTableWidgetState extends State<DataTableWidget> {
             ),
             child: Center(
               child: Text(
-                widget.status,
+                widget.status.tr(),
                 style: TextStyle(
                   color: widget.statusColor,
                   fontSize: ResponsiveHelper.responsiveTextSize(
@@ -175,23 +176,23 @@ class _DataTableWidgetState extends State<DataTableWidget> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child: Row(
                   children: [
                     Icon(Icons.edit, color: Colors.black54),
                     SizedBox(width: 8),
-                    Text('Edit'),
+                    Text('edit'.tr()),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: Row(
                   children: [
                     Icon(Icons.delete, color: Colors.redAccent),
                     SizedBox(width: 8),
-                    Text('Delete'),
+                    Text('delete'.tr()),
                   ],
                 ),
               ),

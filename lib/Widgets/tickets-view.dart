@@ -6,7 +6,7 @@ import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/get-ticket-cubits.dart';
+import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
 import 'package:final_app/util/colors.dart';
 
 class TicketsList extends StatefulWidget {
@@ -117,7 +117,10 @@ class _TicketsListState extends State<TicketsList> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TicketDetailsScreen(ticket: ticketDetails),
+                              TicketDetailsScreen(
+                                ticket: ticketDetails,
+                                userTicket: ticket,
+                              ),
                         ),
                       );
                     } catch (e) {

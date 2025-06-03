@@ -1,13 +1,18 @@
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/Custom-big-button.dart';
 import 'package:final_app/Helper/custom-textField.dart';
 import 'package:final_app/Helper/enum-helper.dart';
-import 'package:final_app/cubits/rest-password-cubit.dart';
-import 'package:final_app/cubits/rest-password-state.dart';
+import 'package:final_app/cubits/resetPassword/rest-password-cubit.dart';
+import 'package:final_app/cubits/resetPassword/rest-password-state.dart';
 import 'package:final_app/screens/otp-screen.dart';
-import 'package:flutter/material.dart';
-import 'package:final_app/util/responsive-helper.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:final_app/services/send-forget-pass-api.dart';
+import 'package:final_app/util/responsive-helper.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+
 
 class ResetPasswordScreen extends StatelessWidget {
   static const String routeName = '/rest-password';
@@ -16,10 +21,10 @@ class ResetPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // نحاول نوصل للكيوبيت
+
     final maybeCubit = context.read<ResetPasswordCubit?>();
 
-    // لو مش موجود، نغلف الصفحة كلها بالكيوبيت
+
     if (maybeCubit == null) {
       final api = context.read<SendForgetPassApi>();
 
@@ -43,10 +48,11 @@ class _ResetPasswordScreenContent extends StatefulWidget {
 
 class _ResetPasswordScreenContentState
     extends State<_ResetPasswordScreenContent> {
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   void dispose() {
- 
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -113,7 +119,7 @@ class _ResetPasswordScreenContentState
     return Column(
       children: [
         Text(
-          'Reset Your Password',
+          'resetYourPassword'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -133,12 +139,12 @@ class _ResetPasswordScreenContentState
     return Column(
       children: [
         Text(
-          'We will send an email with',
+          'We will send an email with'.tr(),
           style: TextStyle(
               fontSize: ResponsiveHelper.responsiveTextSize(context, 14)),
         ),
         Text(
-          'instructions to reset password.',
+          'instructions to reset password.'.tr(),
           style: TextStyle(
               fontSize: ResponsiveHelper.responsiveTextSize(context, 14)),
         ),
@@ -150,10 +156,10 @@ class _ResetPasswordScreenContentState
     return BlocBuilder<ResetPasswordCubit, ResetPasswordState>(
       builder: (context, state) {
         return CustomTextField(
-          label: 'Email',
-          controller: context.read<ResetPasswordCubit>().emailController,
+          label: 'Email'.tr(),
+          controller: _emailController,
           prefixIcon: Icons.email,
-          hintText: 'Enter your Email',
+          hintText: 'enterYourEmail'.tr(),
           keyboardType: TextInputType.emailAddress,
           onChanged: (value) {
             context.read<ResetPasswordCubit>().updateButtonState(value!);
@@ -183,10 +189,10 @@ class _ResetPasswordScreenContentState
                 ? () {
                     context
                         .read<ResetPasswordCubit>()
-                        .resetPassword(context.read<ResetPasswordCubit>().emailController.text);
+                        .resetPassword(_emailController.text);
                   }
                 : null,
-            buttonText: 'Reset Password',
+            buttonText: 'resetButton'.tr(),
           ),
         );
       },

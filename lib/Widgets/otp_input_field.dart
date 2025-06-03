@@ -1,9 +1,9 @@
-import 'package:final_app/cubits/otp-verification-state.dart';
+import 'package:final_app/cubits/otp/otp-verification-state.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/otp-verification-cubit.dart';
+import 'package:final_app/cubits/otp/otp-verification-cubit.dart';
 
 class OtpInputField extends StatelessWidget {
   final TextEditingController controller;

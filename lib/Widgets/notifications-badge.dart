@@ -1,7 +1,7 @@
-import 'package:final_app/cubits/notifications-state.dart';
+import 'package:final_app/cubits/notifications/notifications-state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/notifications-cubit.dart';
+import 'package:final_app/cubits/notifications/notifications-cubit.dart';
 import 'package:final_app/screens/notifications-screen.dart';
 
 class NotificationBadge extends StatelessWidget {

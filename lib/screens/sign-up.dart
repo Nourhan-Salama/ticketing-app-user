@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
-import 'package:final_app/cubits/otp-verification-cubit.dart';
-import 'package:final_app/cubits/sign-up-cubit.dart';
-import 'package:final_app/cubits/sign-up-state.dart';
+import 'package:final_app/Widgets/drawer.dart';
+import 'package:final_app/cubits/otp/otp-verification-cubit.dart';
+import 'package:final_app/cubits/signUp/sign-up-cubit.dart';
+import 'package:final_app/cubits/signUp/sign-up-state.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/services/resend-otp-api.dart';
 import 'package:final_app/services/verify_user_auth.dart';
@@ -82,7 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Create Account!",
+                              "createAccount".tr(),
                               style: TextStyle(
                                 fontSize: screenWidth * 0.06,
                                 fontWeight: FontWeight.bold,
@@ -91,7 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             SizedBox(height: screenHeight * 0.01),
                             Text(
-                              "Sign up to get started",
+                              "signUPToStart".tr(),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Colors.white70,
@@ -114,8 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // First Name Field
                           CustomTextField(
                             successText: state.firstNameSuccess,
-                            label: "First Name",
-                            hintText: "Enter Your First Name",
+                            label: "firstName".tr(),
+                            hintText: "enterFirstName".tr(),
                             prefixIcon: Icons.person,
                             errorText: state.firstNameError,
                             controller: cubit.firstNameController,
@@ -130,8 +132,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // Last Name Field
                           CustomTextField(
                             successText: state.lastNameSuccess,
-                            label: "Last Name",
-                            hintText: "Enter Your Last Name",
+                            label: "lastName".tr(),
+                            hintText: "enterLastName".tr(),
                             prefixIcon: Icons.person_outline,
                             errorText: state.lastNameError,
                             controller: cubit.lastNameController,
@@ -146,8 +148,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // Email Field
                           CustomTextField(
                             successText: state.emailSuccess,
-                            label: "Email",
-                            hintText: "Enter Your Email",
+                            label: "Email".tr(),
+                            hintText: "enterYourEmail".tr(),
                             prefixIcon: Icons.email,
                             errorText: state.emailError,
                             controller: cubit.emailController,
@@ -164,8 +166,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // Password Field
                           CustomTextField(
                             successText: state.passwordSuccess,
-                            label: "Password",
-                            hintText: "Enter Your Password",
+                            label: "password".tr(),
+                            hintText: "enterYourPassword".tr(),
                             prefixIcon: Icons.lock,
                             suffixIcon: state.obscurePassword
                                 ? Icons.visibility_off
@@ -185,8 +187,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // Confirm Password Field
                           CustomTextField(
                             successText: state.confirmPasswordSuccess,
-                            label: "Confirm Password",
-                            hintText: "Confirm Your Password",
+                            label: "confirmPassword".tr(),
+                            hintText: "confirmYourPassword".tr(),
                             prefixIcon: Icons.lock,
                             suffixIcon: state.obscureConfirmPassword
                                 ? Icons.visibility_off
@@ -212,7 +214,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               cubit.submitForm(context);
                             },
                             buttonText:
-                                state.isLoading ? 'Signing Up...' : 'Sign Up',
+                                state.isLoading ? 'loading'.tr() : 'signUp'.tr(),
                           ),
 
                           SizedBox(height: screenHeight * 0.02),
@@ -222,13 +224,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onPressed: () => Navigator.pop(context),
                             child: RichText(
                               text: TextSpan(
-                                text: "Already have an account? ",
+                                text: "haveAnAccount".tr(),
                                 style: TextStyle(
                                     color: Colors.grey[700],
                                     fontSize: screenWidth * 0.04),
                                 children: [
                                   TextSpan(
-                                    text: 'Login',
+                                    text: 'login'.tr(),
                                     style: TextStyle(
                                         color: ColorsHelper.darkBlue,
                                         fontWeight: FontWeight.bold),

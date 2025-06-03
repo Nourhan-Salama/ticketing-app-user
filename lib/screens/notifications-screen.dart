@@ -1,88 +1,88 @@
-import 'package:final_app/cubits/notifications-state.dart';
+
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
+import 'package:final_app/cubits/notifications/notifications-cubit.dart';
+import 'package:final_app/cubits/notifications/notifications-state.dart';
 import 'package:final_app/models/notifications-model.dart';
+import 'package:final_app/screens/ticket-details.dart';
+import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/notifications-cubit.dart';
-
 import 'package:intl/intl.dart';
 
-class NotificationsScreen extends StatelessWidget {
+
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.mark_as_unread),
-            onPressed: () => _markAllAsRead(context),
-            tooltip: 'Mark all as read',
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () => _deleteAllNotifications(context),
-            tooltip: 'Delete all',
-          ),
-        ],
-      ),
-      body: BlocConsumer<NotificationsCubit, NotificationsState>(
-        listener: (context, state) {
-          if (state is NotificationsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message),
-            )  );
-          }
-        },
-        builder: (context, state) {
-          if (state is NotificationsLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is NotificationsLoaded) {
-            if (state.notifications.isEmpty) {
-              return const Center(
-                child: Text('No notifications available'),
-              );
-            }
-            return RefreshIndicator(
-              onRefresh: () => context.read<NotificationsCubit>().loadNotifications(),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemCount: state.notifications.length,
-                itemBuilder: (context, index) {
-                  final notification = state.notifications[index];
-                  return _buildNotificationCard(context, notification);
-                },
-              ),
-            );
-          } else if (state is NotificationsError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<NotificationsCubit>().loadNotifications(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const Center(child: Text('No notifications available'));
-        },
-      ),
-    );
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotificationsCubit>().loadNotifications();
   }
 
-  Widget _buildNotificationCard(BuildContext context, NotificationModel notification) {
+  Future<void> _handleNotificationTap(
+      BuildContext context, NotificationModel notification) async {
+    if (notification.seen) return;
+
+    if (!notification.read) {
+      await context.read<NotificationsCubit>().markAsRead(notification.id);
+    }
+
+    if (notification.data.type == NotificationType.ticketResolved ||
+        notification.data.type == NotificationType.chat) {
+      await navigateToTicketDetails(context, notification);
+    }
+  }
+
+  Future<void> navigateToTicketDetails(
+      BuildContext context, NotificationModel notification) async {
+    final ticketId = notification.data.modelId;
+    if (ticketId == 0) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final ticketDetails =
+          await context.read<TicketsCubit>().getTicketDetails(ticketId);
+      final fullTicket = await context.read<TicketsCubit>().getTicketById(ticketId);
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TicketDetailsScreen(
+            ticket: ticketDetails,
+            userTicket: fullTicket,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load ticket: ${e.toString()}')),
+      );
+    }
+  }
+
+  Widget _buildNotificationCard(
+      BuildContext context, NotificationModel notification) {
     return Dismissible(
-      key: Key(notification.id),
+      key: Key(notification.id.toString()),
       background: Container(
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: ColorsHelper.LightGrey,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerRight,
@@ -93,16 +93,16 @@ class NotificationsScreen extends StatelessWidget {
         return await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Delete Notification'),
-            content: const Text('Are you sure you want to delete this notification?'),
+            title: Text('delete_notification_confirm_title'.tr()),
+            content:  Text('delete_notification_confirm_message'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text('cancel'.tr()),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                child: Text('delete'.tr(), style: const TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -111,17 +111,26 @@ class NotificationsScreen extends StatelessWidget {
       onDismissed: (_) {
         context.read<NotificationsCubit>().deleteNotification(notification.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notification deleted')),
+          SnackBar(content: Text('delete_notification_success'.tr())),
         );
       },
       child: Card(
+        color: notification.seen ? Colors.grey[100] : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: notification.seen 
+                ? Colors.grey[300]!
+                : Theme.of(context).primaryColor.withOpacity(0.3),
+            width: 1,
+          ),
         ),
-        elevation: 2,
+        elevation: notification.seen ? 1 : 3,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => _markAsReadAndNavigate(context, notification),
+          onTap: notification.seen 
+              ? null
+              : () => _handleNotificationTap(context, notification),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -131,37 +140,64 @@ class NotificationsScreen extends StatelessWidget {
                   children: [
                     Icon(
                       _getNotificationIcon(notification.data.type),
-                      color: notification.read ? Colors.grey : Theme.of(context).primaryColor,
+                      color: notification.seen
+                          ? Colors.grey
+                          : Theme.of(context).primaryColor,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         notification.title,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: notification.read ? Colors.grey : Colors.black,
+                          fontWeight: notification.seen 
+                              ? FontWeight.normal 
+                              : FontWeight.bold,
+                          color: notification.seen ? Colors.grey : Colors.black,
                         ),
                       ),
                     ),
                     Text(
                       DateFormat('h:mm a').format(notification.createdAt),
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: notification.seen 
+                            ? Colors.grey[600] 
+                            : Theme.of(context).primaryColor,
                         fontSize: 12,
                       ),
                     ),
+                    if (!notification.seen) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(notification.body),
-                if (notification.data.type.isNotEmpty) ...[
+                Text(
+                  notification.body,
+                  style: TextStyle(
+                    color: notification.seen ? Colors.grey[600] : Colors.grey[800],
+                  ),
+                ),
+                if (notification.data.type != NotificationType.unknown) ...[
                   const SizedBox(height: 8),
                   Chip(
                     label: Text(
-                      notification.data.type.replaceAll('_', ' ').toUpperCase(),
-                      style: const TextStyle(fontSize: 12),
+                      notification.data.type.displayName.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: notification.seen ? Colors.grey : Colors.white,
+                      ),
                     ),
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: notification.seen 
+                        ? Colors.grey[200] 
+                        : Theme.of(context).primaryColor,
                   ),
                 ],
               ],
@@ -172,30 +208,27 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  IconData _getNotificationIcon(String type) {
+  IconData _getNotificationIcon(NotificationType type) {
     switch (type) {
-      case 'ticket_created': return Icons.add_alert;
-      case 'ticket_updated': return Icons.edit;
-      case 'ticket_assigned': return Icons.assignment_ind;
-      case 'ticket_resolved': return Icons.check_circle;
-      default: return Icons.notifications;
+      case NotificationType.ticketCreated:
+        return Icons.add_alert;
+      case NotificationType.ticketUpdated:
+        return Icons.edit;
+      case NotificationType.ticketAssigned:
+        return Icons.assignment_ind;
+      case NotificationType.ticketResolved:
+        return Icons.check_circle;
+      case NotificationType.chat:
+        return Icons.chat;
+      default:
+        return Icons.notifications;
     }
-  }
-
-  void _markAsReadAndNavigate(BuildContext context, NotificationModel notification) {
-    if (!notification.read) {
-      context.read<NotificationsCubit>().markAsRead(notification.id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Marked as read')),
-      );
-    }
-    // Add navigation logic here if needed
   }
 
   void _markAllAsRead(BuildContext context) {
     context.read<NotificationsCubit>().markAllAsRead();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All notifications marked as read')),
+     SnackBar(content: Text('all_notifications_marked_read'.tr())),
     );
   }
 
@@ -203,25 +236,84 @@ class NotificationsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete All Notifications'),
-        content: const Text('Are you sure you want to delete all notifications?'),
+        title: Text('delete_all_confirm_title'.tr()),
+        content:  Text('delete_all_confirm_message'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<NotificationsCubit>().deleteAll();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('All notifications deleted')),
+                SnackBar(content: Text('all_notifications_deleted'.tr())),
               );
             },
-            child: const Text('Delete All', style: TextStyle(color: Colors.red)),
+            child: Text('delete_all'.tr(), style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = context.select<NotificationsCubit, bool>(
+      (cubit) => cubit.state is NotificationsLoading,
+    );
+
+    final notifications =
+        context.read<NotificationsCubit>().technicianNotifications;
+
+    return Scaffold(
+      appBar: AppBar(
+        title:  Text('notifications_title'.tr()),
+        actions: [
+          BlocBuilder<NotificationsCubit, NotificationsState>(
+            builder: (context, state) {
+              if (state is NotificationsLoaded && state.unreadCount > 0) {
+                return Badge(
+                  label: Text(state.unreadCount.toString()),
+                  child: IconButton(
+                    icon: const Icon(Icons.mark_as_unread),
+                    onPressed: () => _markAllAsRead(context),
+                    tooltip: 'mark_all_read'.tr(),
+                  ),
+                );
+              }
+              return IconButton(
+                icon: const Icon(Icons.mark_as_unread),
+                onPressed: () => _markAllAsRead(context),
+                tooltip: 'mark_all_read'.tr(),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: () => _deleteAllNotifications(context),
+            tooltip: 'delete_all'.tr(),
+          ),
+        ],
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (notifications.isEmpty
+              ?  Center(child: Text('no_notifications'.tr()))
+              : RefreshIndicator(
+                  onRefresh: () =>
+                      context.read<NotificationsCubit>().loadNotifications(),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return _buildNotificationCard(context, notification);
+                    },
+                  ),
+                )),
     );
   }
 }

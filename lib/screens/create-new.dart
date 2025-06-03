@@ -1,5 +1,7 @@
-import 'package:final_app/cubits/creat-new-cubit.dart';
-import 'package:final_app/cubits/create-new-state.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/Widgets/drawer.dart';
+import 'package:final_app/cubits/createNewTicket/creat-new-cubit.dart';
+import 'package:final_app/cubits/createNewTicket/create-new-state.dart';
 import 'package:final_app/models/service-model.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/util/colors.dart';
@@ -62,7 +64,7 @@ class CreateNewScreen extends StatelessWidget {
       create: (_) => CreateNewCubit(ticket: ticket),
       child: Scaffold(
         appBar: CustomAppBar(
-            title: ticket != null ? 'Edit Ticket' : 'Create New Ticket'),
+            title: ticket != null ? 'Edit Ticket'.tr(): 'createNewTicket'.tr()),
         body: BlocConsumer<CreateNewCubit, CreateNewState>(
           listener: (context, state) {
             if (state.submissionError != null) {
@@ -91,8 +93,8 @@ class CreateNewScreen extends StatelessWidget {
                           context.read<CreateNewCubit>().titleController,
                       decoration: getFieldDecoration(
                         context: context,
-                        labelText: 'Title',
-                        hintText: 'Enter ticket title',
+                        labelText: 'title'.tr(),
+                        hintText: 'enterTitle'.tr(),
                         successText: state.titleSuccess,
                         // errorText: state.titleError,
                       ),
@@ -105,8 +107,8 @@ class CreateNewScreen extends StatelessWidget {
                       value: state.selectedService,
                       decoration: getFieldDecoration(
                         context: context,
-                        labelText: 'Service',
-                        hintText: 'Select service',
+                        labelText: 'service'.tr(),
+                        hintText: 'selectService'.tr(),
                         successText: state.serviceSuccess,
                         //errorText: state.serviceError,
                       ),
@@ -128,8 +130,8 @@ class CreateNewScreen extends StatelessWidget {
                           context.read<CreateNewCubit>().descriptionController,
                       decoration: getFieldDecoration(
                         context: context,
-                        labelText: 'Description',
-                        hintText: 'Type description',
+                        labelText: 'description'.tr(),
+                        hintText: 'typeDescription'.tr(),
                         successText: state.descriptionSuccess,
                         //errorText: state.descriptionError,
                       ),
@@ -176,8 +178,8 @@ class CreateNewScreen extends StatelessWidget {
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
                               ticket != null
-                                  ? 'Update Ticket'
-                                  : 'Submit Ticket',
+                                  ? 'upDateTicket'.tr()
+                                  : 'submitTicket'.tr(),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:final_app/Helper/enum-helper.dart';
-import 'package:final_app/cubits/otp-verification-state.dart';
+import 'package:final_app/cubits/otp/otp-verification-state.dart';
 import 'package:final_app/services/resend-otp-api.dart';
 import 'package:final_app/services/verify_user_auth.dart';
 
@@ -35,7 +35,7 @@ class OtpCubit extends Cubit<OtpState> {
 
   void startTimer() {
     _timer?.cancel();
-    _secondsRemaining = 120;
+    _secondsRemaining = 90;
     emit(OtpTimerRunning(_secondsRemaining));
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {

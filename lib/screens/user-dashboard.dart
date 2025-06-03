@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:final_app/models/statistics-model.dart';
 import 'package:final_app/Helper/app-bar.dart';
@@ -48,7 +49,7 @@ class _UserDashboardState extends State<UserDashboard> {
     return Scaffold(
       drawer: const MyDrawer(),
       appBar: CustomAppBar(
-        title: 'Dashboard',
+        title: 'dashboard'.tr(),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -62,13 +63,13 @@ class _UserDashboardState extends State<UserDashboard> {
                   crossAxisSpacing: 12,
                   children: [
                     StatusCard(
-                      title: 'All Tickets',
+                      title: 'allTickets'.tr(),
                       value: _stats!.totalTickets.toString(),
                       percentage: 100,
                       isLoading: _stats == null,
                     ),
                     StatusCard(
-                      title: 'Open Tickets',
+                      title: 'openTickets'.tr(),
                       value: _stats!.openTickets.toString(),
                       percentage: (_stats!.totalTickets == 0)
                           ? 0
@@ -78,7 +79,7 @@ class _UserDashboardState extends State<UserDashboard> {
                       isLoading: _stats == null,
                     ),
                     StatusCard(
-                      title: 'Closed Tickets',
+                      title: 'closedTickets'.tr(),
                       value: _stats!.closedTickets.toString(),
                       percentage: (_stats!.totalTickets == 0)
                           ? 0

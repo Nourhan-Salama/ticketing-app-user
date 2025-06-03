@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/services/auth-service-register.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
-import 'package:final_app/cubits/sign-up-state.dart';
+import 'package:final_app/cubits/signUp/sign-up-state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
     SignUpCubit() : super(SignUpState.initial()) {
@@ -38,44 +40,44 @@ class SignUpCubit extends Cubit<SignUpState> {
     String? firstNameSuccess, lastNameSuccess, emailSuccess, passwordSuccess, confirmPasswordSuccess;
 
     if (firstName.isEmpty) {
-      firstNameError = 'First name is required';
+      firstNameError = 'errorFristName'.tr();
     } else if (firstName.length < 2) {
-      firstNameError = 'First name is too short';
+      firstNameError = 'firstNameShort'.tr();
     } else {
-      firstNameSuccess = "Looks good!";
+      firstNameSuccess = "looksGood".tr();
     }
 
     if (lastName.isEmpty) {
-      lastNameError = 'Last name is required';
+      lastNameError = 'lastNameEmpty'.tr();
     } else if (lastName.length < 2) {
-      lastNameError = 'Last name is too short';
+      lastNameError = 'lastNameShort'.tr();
     } else {
-      lastNameSuccess = "Looks good!";
+      lastNameSuccess = "looksGood".tr();
     }
 
     final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     if (email.isEmpty) {
-      emailError = 'Email cannot be empty';
+      emailError = 'email_empty'.tr();
     } else if (!emailRegex.hasMatch(email)) {
-      emailError = 'Invalid Email';
+      emailError = 'email_invalid'.tr();
     } else {
-      emailSuccess = "Valid Email!";
+      emailSuccess = "validEmail".tr();
     }
 
     if (password.isEmpty) {
-      passwordError = "Password cannot be empty";
+      passwordError = "passwordEmpty".tr();
     } else if (password.length < 8) {
-      passwordError = "Password must be at least 8 characters";
+      passwordError = "passwordShort".tr();
     } else {
-      passwordSuccess = "Strong password!";
+      passwordSuccess = "strongPassword".tr();
     }
 
     if (confirmPassword.isEmpty) {
-      confirmPasswordError = "Please confirm your password";
+      confirmPasswordError = "confirm_password_hint".tr();
     } else if (password != confirmPassword) {
-      confirmPasswordError = "Passwords do not match";
+      confirmPasswordError = "passwordsDoNotMatch".tr();
     } else {
-      confirmPasswordSuccess = "Passwords match!";
+      confirmPasswordSuccess = "passwordsMatch".tr();
     }
 
     final isButtonEnabled = firstName.isNotEmpty &&
@@ -111,8 +113,8 @@ class SignUpCubit extends Cubit<SignUpState> {
 
     if (!state.isButtonEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all fields correctly'),
+        SnackBar(
+          content: Text('fillAllFields').tr(),
           backgroundColor: Colors.red,
         ),
       );

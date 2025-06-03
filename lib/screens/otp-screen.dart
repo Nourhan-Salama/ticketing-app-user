@@ -1,9 +1,11 @@
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/Custom-big-button.dart';
 import 'package:final_app/Helper/enum-helper.dart';
 import 'package:final_app/Helper/resend-otp-button.dart';
 import 'package:final_app/Widgets/otp_input_field.dart';
-import 'package:final_app/cubits/otp-verification-cubit.dart';
-import 'package:final_app/cubits/otp-verification-state.dart';
+import 'package:final_app/cubits/otp/otp-verification-cubit.dart';
+import 'package:final_app/cubits/otp/otp-verification-state.dart';
 import 'package:final_app/screens/chande-password.dart';
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/services/resend-otp-api.dart';
@@ -12,6 +14,7 @@ import 'package:final_app/util/colors.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 
 class OtpVerificationPage extends StatelessWidget {
   static const routeName = '/otp-page';
@@ -102,8 +105,8 @@ class OtpVerificationPage extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     return Text(
       otpType == OtpType.verification
-          ? "Verify Your Account"
-          : "Reset Your Password",
+          ? "verifyAccount".tr()
+          : "Reset Your Password".tr(),
       style: TextStyle(
         fontSize: ResponsiveHelper.responsiveTextSize(context, 20),
         fontWeight: FontWeight.bold,
@@ -118,8 +121,8 @@ class OtpVerificationPage extends StatelessWidget {
       ),
       child: Text(
         otpType == OtpType.verification
-            ? "Enter the verification code sent to your email"
-            : "Enter the code to reset your password",
+            ? "enterVerificationCode".tr()
+            : "enterCodeToResetPassword".tr(),
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: ResponsiveHelper.responsiveTextSize(context, 14),
@@ -152,8 +155,8 @@ class OtpVerificationPage extends StatelessWidget {
           ),
           child: SubmitButton(
             buttonText: otpType == OtpType.verification
-                ? 'Verify Account'
-                : 'Continue',
+                ? 'verifyAccount'.tr()
+                : 'continue'.tr(),
             isEnabled: state is! OtpLoading,
             isLoading: state is OtpLoading,
             onPressed: () {
@@ -198,6 +201,7 @@ class OtpVerificationPage extends StatelessWidget {
     }
   }
 }
+
 
 
 

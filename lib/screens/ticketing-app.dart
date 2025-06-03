@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
-import 'package:final_app/cubits/notifications-cubit.dart';
+import 'package:final_app/cubits/notifications/notifications-cubit.dart';
 import 'package:final_app/screens/chande-password.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
@@ -14,15 +14,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:final_app/cubits/change-pass-cubit.dart';
-import 'package:final_app/cubits/creat-new-cubit.dart';
-import 'package:final_app/cubits/get-ticket-cubits.dart';
-import 'package:final_app/cubits/profile-cubit.dart';
-import 'package:final_app/cubits/rest-password-cubit.dart';
+import 'package:final_app/cubits/changePassword/change-pass-cubit.dart';
+import 'package:final_app/cubits/createNewTicket/creat-new-cubit.dart';
+import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
+import 'package:final_app/cubits/profile/profile-cubit.dart';
+import 'package:final_app/cubits/resetPassword/rest-password-cubit.dart';
 import 'package:final_app/cubits/rich-text-cubit.dart';
-import 'package:final_app/cubits/sign-up-cubit.dart';
-import 'package:final_app/cubits/otp-verification-cubit.dart';
-import 'package:final_app/cubits/login-cubit.dart';
+import 'package:final_app/cubits/signUp/sign-up-cubit.dart';
+import 'package:final_app/cubits/otp/otp-verification-cubit.dart';
+import 'package:final_app/cubits/login/login-cubit.dart';
 
 import 'package:final_app/services/login-service.dart';
 import 'package:final_app/services/resend-otp-api.dart';
@@ -93,7 +93,8 @@ class TicketingApp extends StatelessWidget {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              initialRoute: accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
+              //initialRoute: accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
+              initialRoute: SplashScreen.routeName,
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
                 LoginScreen.routeName: (_) => LoginScreen(),

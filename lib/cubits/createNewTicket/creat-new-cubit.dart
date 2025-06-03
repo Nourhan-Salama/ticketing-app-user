@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/create-new-state.dart';
+import 'package:final_app/cubits/createNewTicket/create-new-state.dart';
 import 'package:final_app/services/ticket-service.dart';
 import 'package:final_app/models/service-model.dart';
 
@@ -77,19 +79,19 @@ class CreateNewCubit extends Cubit<CreateNewState> {
     if (description.isEmpty || description.length < 10) {
       newState = newState.copyWith(descriptionError: 'At least 10 characters');
     } else {
-      newState = newState.copyWith(descriptionSuccess: 'Good description');
+      newState = newState.copyWith(descriptionSuccess: 'goodDescription'.tr());
     }
 
     if (title.isEmpty || title.length < 3) {
       newState = newState.copyWith(titleError: 'At least 3 characters');
     } else {
-      newState = newState.copyWith(titleSuccess: 'Nice title');
+      newState = newState.copyWith(titleSuccess: 'niceTitle'.tr());
     }
 
     if (state.selectedService == null) {
       newState = newState.copyWith(serviceError: 'Please choose a service');
     } else {
-      newState = newState.copyWith(serviceSuccess: 'Service selected');
+      newState = newState.copyWith(serviceSuccess: 'serviceSelected'.tr());
     }
 
     newState = newState.copyWith(

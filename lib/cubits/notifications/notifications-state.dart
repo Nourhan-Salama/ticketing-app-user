@@ -2,6 +2,8 @@
 
 import 'package:final_app/models/notifications-model.dart';
 
+
+
 abstract class NotificationsState {}
 
 class NotificationsInitial extends NotificationsState {}
@@ -13,6 +15,16 @@ class NotificationsLoaded extends NotificationsState {
   final int unreadCount;
 
   NotificationsLoaded(this.notifications, this.unreadCount);
+
+  NotificationsLoaded copyWith({
+    List<NotificationModel>? notifications,
+    int? unreadCount,
+  }) {
+    return NotificationsLoaded(
+      notifications ?? this.notifications,
+      unreadCount ?? this.unreadCount,
+    );
+  }
 }
 
 class NotificationsError extends NotificationsState {

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:final_app/cubits/change-pass-state.dart';
+import 'package:final_app/cubits/changePassword/change-pass-state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;

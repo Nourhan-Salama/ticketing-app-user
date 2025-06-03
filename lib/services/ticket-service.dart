@@ -57,6 +57,37 @@ class TicketService {
       };
     }
   }
+   Future<Map<String, String>> _getAuthHeaders() async {
+    final token = await _storage.read(key: 'access_token');
+    if (token == null) {
+      throw Exception('Access token not found');
+    }
+    return {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    };
+  }
+  Future<TicketModel> getTicketById(int ticketId) async {
+  try {
+    final headers = await _getAuthHeaders();
+    final url = Uri.parse('$baseUrl/api/technicians/tickets/$ticketId');
+    
+    print('🌐 Fetching full ticket data from: $url');
+    final response = await http.get(url, headers: headers);
+    print('🔵 Response status: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      print('📦 Received full ticket data for ID: $ticketId');
+      return TicketModel.fromJson(jsonData['data']);
+    } else {
+      throw Exception('Failed to load full ticket data: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('❌ Error in getTicketById: $e');
+    rethrow;
+  }
+}
 
   Future<Map<String, dynamic>> updateTicket({
     required int ticketId,

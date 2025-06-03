@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/screens/create-new.dart';
 import 'package:flutter/material.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:final_app/cubits/get-ticket-cubits.dart';
+import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
 
 class CustomDropDownCreateButton extends StatefulWidget {
   const CustomDropDownCreateButton({super.key});
@@ -12,8 +14,15 @@ class CustomDropDownCreateButton extends StatefulWidget {
 }
 
 class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton> {
-  List<String> filterOptions = ['All Tickets', 'Last 5 Tickets', 'Last 10 Tickets'];
-  String currentFilter = 'All Tickets';
+  late List<String> filterOptions;
+  late String currentFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    filterOptions = ['allTickets'.tr(), 'last5'.tr(), 'last10'.tr()];
+    currentFilter = filterOptions[0]; // Initialize with the first option
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +46,7 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
                     value: option,
                     child: Text(
                       option,
-                      style: TextStyle(fontSize: 14),
+                      style: const TextStyle(fontSize: 14),
                     ),
                   );
                 }).toList(),
@@ -47,18 +56,14 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
                   });
                   
                   final ticketCubit = context.read<TicketsCubit>();
-                  switch (selectedValue) {
-                    case 'All Tickets':
-                      ticketCubit.fetchTickets(refresh: true);
-                      break;
-                    case 'Last 5 Tickets':
-                      ticketCubit.filterTickets(5);
-                      break;
-                    case 'Last 10 Tickets':
-                      ticketCubit.filterTickets(10);
-                      break;
-                    default:
-                      ticketCubit.fetchTickets(refresh: true);
+                  if (selectedValue == filterOptions[0]) { // All Tickets
+                    ticketCubit.fetchTickets(refresh: true);
+                  } else if (selectedValue == filterOptions[1]) { // Last 5 Tickets
+                    ticketCubit.filterTickets(5);
+                  } else if (selectedValue == filterOptions[2]) { // Last 10 Tickets
+                    ticketCubit.filterTickets(10);
+                  } else {
+                    ticketCubit.fetchTickets(refresh: true);
                   }
                 },
               ),
@@ -91,8 +96,8 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      'Create New',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      'createNew'.tr(),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
