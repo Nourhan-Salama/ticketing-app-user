@@ -168,7 +168,7 @@
       "emailInvalid": "البريد الإلكتروني غير صالح",
       "passwordEmpty": "كلمة المرور لا يمكن أن تكون فارغة",
       "passwordShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
-      "loginFailed": "فشل تسجيل الدخول",
+
       "serverInvalidResponse": "استجابة غير صالحة من الخادم",
       "networkError": "خطأ في الشبكة. يرجى التحقق من الاتصال.",
       "serverResponseFormat": "تنسيق استجابة الخادم غير صالح",
@@ -208,7 +208,13 @@
     "closedTickets": "التذاكر المغلقة",
     "niceTitle": "عنوان جميل",
     "serviceSelected": "الخدمة المختارة",
-    "goodDescription": "وصف جيد"
+    "goodDescription": "وصف جيد",
+    "loginFailed": "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
+  
+ 
+    "sessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+    "createAccount": "إنشاء حساب",
+    "dontHaveAnAccount": "ليس لديك حساب؟"
    
     
   }

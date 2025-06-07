@@ -28,22 +28,21 @@ class DataTableWidget extends StatefulWidget {
 }
 
 class _DataTableWidgetState extends State<DataTableWidget> {
-  // Removed async/await to prevent deactivated widget error
   void _handleEditPressed(BuildContext context) {
-  final navigator = Navigator.of(context);
-  if (widget.ticket == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('⚠️ Ticket not found.')),
-    );
-    return;
-  }
+    final navigator = Navigator.of(context);
+    if (widget.ticket == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⚠️ Ticket not found.')),
+      );
+      return;
+    }
 
-  navigator.push(
-    MaterialPageRoute(
-      builder: (_) => CreateNewScreen(ticket: widget.ticket),
-    ),
-  );
-}
+    navigator.push(
+      MaterialPageRoute(
+        builder: (_) => CreateNewScreen(ticket: widget.ticket),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +69,13 @@ class _DataTableWidgetState extends State<DataTableWidget> {
                 ),
               ),
               SizedBox(
-                  height: ResponsiveHelper.responsiveValue(
-                context: context,
-                mobile: 4,
-                tablet: 6,
-                desktop: 8,
-              )),
+                height: ResponsiveHelper.responsiveValue(
+                  context: context,
+                  mobile: 4,
+                  tablet: 6,
+                  desktop: 8,
+                ),
+              ),
               Row(
                 children: [
                   Icon(
@@ -89,12 +89,13 @@ class _DataTableWidgetState extends State<DataTableWidget> {
                     ),
                   ),
                   SizedBox(
-                      width: ResponsiveHelper.responsiveValue(
-                    context: context,
-                    mobile: 4,
-                    tablet: 6,
-                    desktop: 8,
-                  )),
+                    width: ResponsiveHelper.responsiveValue(
+                      context: context,
+                      mobile: 4,
+                      tablet: 6,
+                      desktop: 8,
+                    ),
+                  ),
                   Text(
                     widget.userName,
                     style: TextStyle(
@@ -171,8 +172,6 @@ class _DataTableWidgetState extends State<DataTableWidget> {
             onSelected: (value) {
               if (value == 'edit') {
                 _handleEditPressed(context);
-              } else if (value == 'delete') {
-                // Handle delete action
               }
             },
             itemBuilder: (context) => [
@@ -183,16 +182,6 @@ class _DataTableWidgetState extends State<DataTableWidget> {
                     Icon(Icons.edit, color: Colors.black54),
                     SizedBox(width: 8),
                     Text('edit'.tr()),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, color: Colors.redAccent),
-                    SizedBox(width: 8),
-                    Text('delete'.tr()),
                   ],
                 ),
               ),

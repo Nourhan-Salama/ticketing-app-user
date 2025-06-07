@@ -1,4 +1,3 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
 import 'package:final_app/cubits/notifications/notifications-cubit.dart';
@@ -9,7 +8,6 @@ import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -22,44 +20,50 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<NotificationsCubit>().loadNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationsCubit>().loadNotifications();
+    });
   }
 
   Future<void> _handleNotificationTap(
       BuildContext context, NotificationModel notification) async {
-    if (notification.seen) return;
-
+    // Mark as read if not already
     if (!notification.read) {
       await context.read<NotificationsCubit>().markAsRead(notification.id);
     }
 
+    // Handle navigation based on notification type
     if (notification.data.type == NotificationType.ticketResolved ||
         notification.data.type == NotificationType.chat) {
-      await navigateToTicketDetails(context, notification);
+      await _navigateToTicketDetails(context, notification);
     }
   }
 
-  Future<void> navigateToTicketDetails(
+  Future<void> _navigateToTicketDetails(
       BuildContext context, NotificationModel notification) async {
     final ticketId = notification.data.modelId;
     if (ticketId == 0) return;
 
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: const Center(child: CircularProgressIndicator()),
+      ),
     );
 
     try {
-      final ticketDetails =
-          await context.read<TicketsCubit>().getTicketDetails(ticketId);
-      final fullTicket = await context.read<TicketsCubit>().getTicketById(ticketId);
+      final ticketsCubit = context.read<TicketsCubit>();
+      final ticketDetails = await ticketsCubit.getTicketDetails(ticketId);
+      final fullTicket = await ticketsCubit.getTicketById(ticketId);
 
-      if (!mounted) return;
-      Navigator.of(context).pop();
+      navigator.pop(); // Remove loading dialog
 
-      Navigator.push(
-        context,
+      await navigator.push(
         MaterialPageRoute(
           builder: (_) => TicketDetailsScreen(
             ticket: ticketDetails,
@@ -68,9 +72,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       );
     } catch (e) {
-      if (!mounted) return;
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
+      navigator.pop(); // Remove loading dialog
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Failed to load ticket: ${e.toString()}')),
       );
     }
@@ -78,6 +81,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildNotificationCard(
       BuildContext context, NotificationModel notification) {
+    final isUnread = !notification.seen;
+    
     return Dismissible(
       key: Key(notification.id.toString()),
       background: Container(
@@ -94,7 +99,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: Text('delete_notification_confirm_title'.tr()),
-            content:  Text('delete_notification_confirm_message'.tr()),
+            content: Text('delete_notification_confirm_message'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -102,7 +107,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text('delete'.tr(), style: const TextStyle(color: Colors.red)),
+                child: Text('delete'.tr(),
+                    style: const TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -115,22 +121,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         );
       },
       child: Card(
-        color: notification.seen ? Colors.grey[100] : Colors.white,
+        color: isUnread ? Colors.white : Colors.grey[100],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: notification.seen 
-                ? Colors.grey[300]!
-                : Theme.of(context).primaryColor.withOpacity(0.3),
+            color: isUnread
+                ? Theme.of(context).primaryColor.withOpacity(0.3)
+                : Colors.grey[300]!,
             width: 1,
           ),
         ),
-        elevation: notification.seen ? 1 : 3,
+        elevation: isUnread ? 3 : 1,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: notification.seen 
-              ? null
-              : () => _handleNotificationTap(context, notification),
+          onTap: () => _handleNotificationTap(context, notification),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -140,32 +144,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   children: [
                     Icon(
                       _getNotificationIcon(notification.data.type),
-                      color: notification.seen
-                          ? Colors.grey
-                          : Theme.of(context).primaryColor,
+                      color: isUnread
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         notification.title,
                         style: TextStyle(
-                          fontWeight: notification.seen 
-                              ? FontWeight.normal 
-                              : FontWeight.bold,
-                          color: notification.seen ? Colors.grey : Colors.black,
+                          fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                          color: isUnread ? Colors.black : Colors.grey,
                         ),
                       ),
                     ),
                     Text(
                       DateFormat('h:mm a').format(notification.createdAt),
                       style: TextStyle(
-                        color: notification.seen 
-                            ? Colors.grey[600] 
-                            : Theme.of(context).primaryColor,
+                        color: isUnread
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[600],
                         fontSize: 12,
                       ),
                     ),
-                    if (!notification.seen) ...[
+                    if (isUnread) ...[
                       const SizedBox(width: 8),
                       Container(
                         width: 8,
@@ -182,7 +184,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 Text(
                   notification.body,
                   style: TextStyle(
-                    color: notification.seen ? Colors.grey[600] : Colors.grey[800],
+                    color: isUnread ? Colors.grey[800] : Colors.grey[600],
                   ),
                 ),
                 if (notification.data.type != NotificationType.unknown) ...[
@@ -192,12 +194,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       notification.data.type.displayName.toUpperCase(),
                       style: TextStyle(
                         fontSize: 12,
-                        color: notification.seen ? Colors.grey : Colors.white,
+                        color: isUnread ? Colors.white : Colors.grey,
                       ),
                     ),
-                    backgroundColor: notification.seen 
-                        ? Colors.grey[200] 
-                        : Theme.of(context).primaryColor,
+                    backgroundColor: isUnread
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey[200],
                   ),
                 ],
               ],
@@ -228,7 +230,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void _markAllAsRead(BuildContext context) {
     context.read<NotificationsCubit>().markAllAsRead();
     ScaffoldMessenger.of(context).showSnackBar(
-     SnackBar(content: Text('all_notifications_marked_read'.tr())),
+      SnackBar(content: Text('all_notifications_marked_read'.tr())),
     );
   }
 
@@ -237,7 +239,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('delete_all_confirm_title'.tr()),
-        content:  Text('delete_all_confirm_message'.tr()),
+        content: Text('delete_all_confirm_message'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -251,7 +253,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 SnackBar(content: Text('all_notifications_deleted'.tr())),
               );
             },
-            child: Text('delete_all'.tr(), style: TextStyle(color: Colors.red)),
+            child: Text('delete_all'.tr(),
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -260,33 +263,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.select<NotificationsCubit, bool>(
-      (cubit) => cubit.state is NotificationsLoading,
-    );
-
-    final notifications =
-        context.read<NotificationsCubit>().technicianNotifications;
-
     return Scaffold(
       appBar: AppBar(
-        title:  Text('notifications_title'.tr()),
+        title: Text('notifications_title'.tr()),
         actions: [
           BlocBuilder<NotificationsCubit, NotificationsState>(
             builder: (context, state) {
-              if (state is NotificationsLoaded && state.unreadCount > 0) {
-                return Badge(
-                  label: Text(state.unreadCount.toString()),
-                  child: IconButton(
-                    icon: const Icon(Icons.mark_as_unread),
-                    onPressed: () => _markAllAsRead(context),
-                    tooltip: 'mark_all_read'.tr(),
-                  ),
-                );
-              }
-              return IconButton(
-                icon: const Icon(Icons.mark_as_unread),
-                onPressed: () => _markAllAsRead(context),
-                tooltip: 'mark_all_read'.tr(),
+              final unreadCount = state is NotificationsLoaded
+                  ? state.unreadCount
+                  : 0;
+              return Badge(
+                isLabelVisible: unreadCount > 0,
+                label: Text(unreadCount.toString()),
+                child: IconButton(
+                  icon: const Icon(Icons.mark_as_unread),
+                  onPressed: () => _markAllAsRead(context),
+                  tooltip: 'mark_all_read'.tr(),
+                ),
               );
             },
           ),
@@ -297,23 +290,356 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : (notifications.isEmpty
-              ?  Center(child: Text('no_notifications'.tr()))
-              : RefreshIndicator(
-                  onRefresh: () =>
-                      context.read<NotificationsCubit>().loadNotifications(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      return _buildNotificationCard(context, notification);
-                    },
-                  ),
-                )),
+      body: BlocConsumer<NotificationsCubit, NotificationsState>(
+        listener: (context, state) {
+          if (state is NotificationsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is NotificationsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is NotificationsLoaded) {
+            final notifications = state.notifications;
+            if (notifications.isEmpty) {
+              return Center(child: Text('no_notifications'.tr()));
+            }
+            return RefreshIndicator(
+              onRefresh: () => context.read<NotificationsCubit>().loadNotifications(),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = notifications[index];
+                  return _buildNotificationCard(context, notification);
+                },
+              ),
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }
+// import 'package:easy_localization/easy_localization.dart';
+// import 'package:final_app/cubits/tickets/get-ticket-cubits.dart';
+// import 'package:final_app/cubits/notifications/notifications-cubit.dart';
+// import 'package:final_app/cubits/notifications/notifications-state.dart';
+// import 'package:final_app/models/notifications-model.dart';
+// import 'package:final_app/screens/ticket-details.dart';
+// import 'package:final_app/util/colors.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:intl/intl.dart';
+
+
+// class NotificationsScreen extends StatefulWidget {
+//   const NotificationsScreen({Key? key}) : super(key: key);
+
+//   @override
+//   State<NotificationsScreen> createState() => _NotificationsScreenState();
+// }
+
+// class _NotificationsScreenState extends State<NotificationsScreen> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     context.read<NotificationsCubit>().loadNotifications();
+//   }
+
+//   Future<void> _handleNotificationTap(
+//       BuildContext context, NotificationModel notification) async {
+//     if (notification.seen) return;
+
+//     if (!notification.read) {
+//       await context.read<NotificationsCubit>().markAsRead(notification.id);
+//     }
+
+//     if (notification.data.type == NotificationType.ticketResolved ||
+//         notification.data.type == NotificationType.chat) {
+//       await navigateToTicketDetails(context, notification);
+//     }
+//   }
+
+//   Future<void> navigateToTicketDetails(
+//       BuildContext context, NotificationModel notification) async {
+//     final ticketId = notification.data.modelId;
+//     if (ticketId == 0) return;
+
+//     showDialog(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (context) => const Center(child: CircularProgressIndicator()),
+//     );
+
+//     try {
+//       final ticketDetails =
+//           await context.read<TicketsCubit>().getTicketDetails(ticketId);
+//       final fullTicket = await context.read<TicketsCubit>().getTicketById(ticketId);
+
+//       if (!mounted) return;
+//       Navigator.of(context).pop();
+
+//       Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (_) => TicketDetailsScreen(
+//             ticket: ticketDetails,
+//             userTicket: fullTicket,
+//           ),
+//         ),
+//       );
+//     } catch (e) {
+//       if (!mounted) return;
+//       Navigator.of(context).pop();
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Failed to load ticket: ${e.toString()}')),
+//       );
+//     }
+//   }
+
+//   Widget _buildNotificationCard(
+//       BuildContext context, NotificationModel notification) {
+//     return Dismissible(
+//       key: Key(notification.id.toString()),
+//       background: Container(
+//         decoration: BoxDecoration(
+//           color: ColorsHelper.LightGrey,
+//           borderRadius: BorderRadius.circular(12),
+//         ),
+//         alignment: Alignment.centerRight,
+//         padding: const EdgeInsets.only(right: 20),
+//         child: const Icon(Icons.delete, color: Colors.white),
+//       ),
+//       confirmDismiss: (direction) async {
+//         return await showDialog(
+//           context: context,
+//           builder: (context) => AlertDialog(
+//             title: Text('delete_notification_confirm_title'.tr()),
+//             content:  Text('delete_notification_confirm_message'.tr()),
+//             actions: [
+//               TextButton(
+//                 onPressed: () => Navigator.of(context).pop(false),
+//                 child: Text('cancel'.tr()),
+//               ),
+//               TextButton(
+//                 onPressed: () => Navigator.of(context).pop(true),
+//                 child: Text('delete'.tr(), style: const TextStyle(color: Colors.red)),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//       onDismissed: (_) {
+//         context.read<NotificationsCubit>().deleteNotification(notification.id);
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('delete_notification_success'.tr())),
+//         );
+//       },
+//       child: Card(
+//         color: notification.seen ? Colors.grey[100] : Colors.white,
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(12),
+//           side: BorderSide(
+//             color: notification.seen 
+//                 ? Colors.grey[300]!
+//                 : Theme.of(context).primaryColor.withOpacity(0.3),
+//             width: 1,
+//           ),
+//         ),
+//         elevation: notification.seen ? 1 : 3,
+//         child: InkWell(
+//           borderRadius: BorderRadius.circular(12),
+//           onTap: notification.seen 
+//               ? null
+//               : () => _handleNotificationTap(context, notification),
+//           child: Padding(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Icon(
+//                       _getNotificationIcon(notification.data.type),
+//                       color: notification.seen
+//                           ? Colors.grey
+//                           : Theme.of(context).primaryColor,
+//                     ),
+//                     const SizedBox(width: 12),
+//                     Expanded(
+//                       child: Text(
+//                         notification.title,
+//                         style: TextStyle(
+//                           fontWeight: notification.seen 
+//                               ? FontWeight.normal 
+//                               : FontWeight.bold,
+//                           color: notification.seen ? Colors.grey : Colors.black,
+//                         ),
+//                       ),
+//                     ),
+//                     Text(
+//                       DateFormat('h:mm a').format(notification.createdAt),
+//                       style: TextStyle(
+//                         color: notification.seen 
+//                             ? Colors.grey[600] 
+//                             : Theme.of(context).primaryColor,
+//                         fontSize: 12,
+//                       ),
+//                     ),
+//                     if (!notification.seen) ...[
+//                       const SizedBox(width: 8),
+//                       Container(
+//                         width: 8,
+//                         height: 8,
+//                         decoration: BoxDecoration(
+//                           color: Theme.of(context).primaryColor,
+//                           shape: BoxShape.circle,
+//                         ),
+//                       ),
+//                     ],
+//                   ],
+//                 ),
+//                 const SizedBox(height: 8),
+//                 Text(
+//                   notification.body,
+//                   style: TextStyle(
+//                     color: notification.seen ? Colors.grey[600] : Colors.grey[800],
+//                   ),
+//                 ),
+//                 if (notification.data.type != NotificationType.unknown) ...[
+//                   const SizedBox(height: 8),
+//                   Chip(
+//                     label: Text(
+//                       notification.data.type.displayName.toUpperCase(),
+//                       style: TextStyle(
+//                         fontSize: 12,
+//                         color: notification.seen ? Colors.grey : Colors.white,
+//                       ),
+//                     ),
+//                     backgroundColor: notification.seen 
+//                         ? Colors.grey[200] 
+//                         : Theme.of(context).primaryColor,
+//                   ),
+//                 ],
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   IconData _getNotificationIcon(NotificationType type) {
+//     switch (type) {
+//       case NotificationType.ticketCreated:
+//         return Icons.add_alert;
+//       case NotificationType.ticketUpdated:
+//         return Icons.edit;
+//       case NotificationType.ticketAssigned:
+//         return Icons.assignment_ind;
+//       case NotificationType.ticketResolved:
+//         return Icons.check_circle;
+//       case NotificationType.chat:
+//         return Icons.chat;
+//       default:
+//         return Icons.notifications;
+//     }
+//   }
+
+//   void _markAllAsRead(BuildContext context) {
+//     context.read<NotificationsCubit>().markAllAsRead();
+//     ScaffoldMessenger.of(context).showSnackBar(
+//      SnackBar(content: Text('all_notifications_marked_read'.tr())),
+//     );
+//   }
+
+//   void _deleteAllNotifications(BuildContext context) {
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text('delete_all_confirm_title'.tr()),
+//         content:  Text('delete_all_confirm_message'.tr()),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.of(context).pop(),
+//             child: Text('cancel'.tr()),
+//           ),
+//           TextButton(
+//             onPressed: () {
+//               Navigator.of(context).pop();
+//               context.read<NotificationsCubit>().deleteAll();
+//               ScaffoldMessenger.of(context).showSnackBar(
+//                 SnackBar(content: Text('all_notifications_deleted'.tr())),
+//               );
+//             },
+//             child: Text('delete_all'.tr(), style: TextStyle(color: Colors.red)),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isLoading = context.select<NotificationsCubit, bool>(
+//       (cubit) => cubit.state is NotificationsLoading,
+//     );
+
+//     final notifications =
+//         context.read<NotificationsCubit>().technicianNotifications;
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title:  Text('notifications_title'.tr()),
+//         actions: [
+//           BlocBuilder<NotificationsCubit, NotificationsState>(
+//             builder: (context, state) {
+//               if (state is NotificationsLoaded && state.unreadCount > 0) {
+//                 return Badge(
+//                   label: Text(state.unreadCount.toString()),
+//                   child: IconButton(
+//                     icon: const Icon(Icons.mark_as_unread),
+//                     onPressed: () => _markAllAsRead(context),
+//                     tooltip: 'mark_all_read'.tr(),
+//                   ),
+//                 );
+//               }
+//               return IconButton(
+//                 icon: const Icon(Icons.mark_as_unread),
+//                 onPressed: () => _markAllAsRead(context),
+//                 tooltip: 'mark_all_read'.tr(),
+//               );
+//             },
+//           ),
+//           IconButton(
+//             icon: const Icon(Icons.delete_sweep),
+//             onPressed: () => _deleteAllNotifications(context),
+//             tooltip: 'delete_all'.tr(),
+//           ),
+//         ],
+//       ),
+//       body: isLoading
+//           ? const Center(child: CircularProgressIndicator())
+//           : (notifications.isEmpty
+//               ?  Center(child: Text('no_notifications'.tr()))
+//               : RefreshIndicator(
+//                   onRefresh: () =>
+//                       context.read<NotificationsCubit>().loadNotifications(),
+//                   child: ListView.separated(
+//                     padding: const EdgeInsets.all(16),
+//                     separatorBuilder: (_, __) => const SizedBox(height: 8),
+//                     itemCount: notifications.length,
+//                     itemBuilder: (context, index) {
+//                       final notification = notifications[index];
+//                       return _buildNotificationCard(context, notification);
+//                     },
+//                   ),
+//                 )),
+//     );
+//   }
+// }

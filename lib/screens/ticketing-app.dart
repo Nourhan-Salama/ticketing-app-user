@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
+import 'package:final_app/cubits/localization/localization-cubit.dart';
 import 'package:final_app/cubits/notifications/notifications-cubit.dart';
 import 'package:final_app/screens/chande-password.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
+import 'package:final_app/services/localization-service.dart';
 import 'package:final_app/services/notifications-services.dart';
 import 'package:final_app/services/service-profile.dart';
 import 'package:final_app/services/ticket-service.dart';
@@ -65,6 +67,7 @@ class TicketingApp extends StatelessWidget {
         RepositoryProvider(create: (_) => SendForgetPassApi()),
         RepositoryProvider(create: (_) => TicketService()),
         RepositoryProvider(create: (_) => NotificationService()),
+        RepositoryProvider(create: (_) => LocalizationService()),
       ],
       child: Builder(
         builder: (context) {
@@ -87,6 +90,11 @@ class TicketingApp extends StatelessWidget {
               BlocProvider(
                   create: (context) =>
                       NotificationsCubit(context.read<NotificationService>())),
+                       BlocProvider(
+                create: (context) => LocalizationCubit(
+                  context.read<LocalizationService>(),
+                ),
+              ),
             ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,

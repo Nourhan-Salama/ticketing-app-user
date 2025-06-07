@@ -7,6 +7,7 @@ class StatusCard extends StatelessWidget {
   final String value;
   final num percentage;
   final bool isLoading;
+    final IconData icon;
 
   const StatusCard({
     super.key,
@@ -14,6 +15,7 @@ class StatusCard extends StatelessWidget {
     required this.value,
     required this.percentage,
     this.isLoading = false,
+    required this.icon,
   });
 
   @override

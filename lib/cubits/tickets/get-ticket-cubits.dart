@@ -142,7 +142,7 @@ class TicketsCubit extends Cubit<TicketsState> {
     await fetchTickets(refresh: true);
   }
 
-  /// دمج filterTickets من الكود القديم
+
   void filterTickets(int count) {
     if (count == 0) {
       _isFiltered = false;

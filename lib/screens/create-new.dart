@@ -26,11 +26,7 @@ class CreateNewScreen extends StatelessWidget {
       labelText: labelText,
       hintText: hintText,
       errorText: errorText,
-      helperText: errorText == null ? successText : null,
-      helperStyle: TextStyle(
-        color: ColorsHelper.darkBlue,
-        fontSize: 12,
-      ),
+      // ✅ تم حذف عرض النص الخاص بالنجاح
       errorStyle: TextStyle(
         color: Theme.of(context).colorScheme.error,
         fontSize: 12,
@@ -64,7 +60,7 @@ class CreateNewScreen extends StatelessWidget {
       create: (_) => CreateNewCubit(ticket: ticket),
       child: Scaffold(
         appBar: CustomAppBar(
-            title: ticket != null ? 'Edit Ticket'.tr(): 'createNewTicket'.tr()),
+            title: ticket != null ? 'Edit Ticket'.tr() : 'createNewTicket'.tr()),
         body: BlocConsumer<CreateNewCubit, CreateNewState>(
           listener: (context, state) {
             if (state.submissionError != null) {
@@ -96,7 +92,6 @@ class CreateNewScreen extends StatelessWidget {
                         labelText: 'title'.tr(),
                         hintText: 'enterTitle'.tr(),
                         successText: state.titleSuccess,
-                        // errorText: state.titleError,
                       ),
                       textInputAction: TextInputAction.next,
                     ),
@@ -110,7 +105,6 @@ class CreateNewScreen extends StatelessWidget {
                         labelText: 'service'.tr(),
                         hintText: 'selectService'.tr(),
                         successText: state.serviceSuccess,
-                        //errorText: state.serviceError,
                       ),
                       items: state.services.map((ServiceModel service) {
                         return DropdownMenuItem<ServiceModel>(
@@ -133,7 +127,6 @@ class CreateNewScreen extends StatelessWidget {
                         labelText: 'description'.tr(),
                         hintText: 'typeDescription'.tr(),
                         successText: state.descriptionSuccess,
-                        //errorText: state.descriptionError,
                       ),
                       maxLines: 5,
                       textInputAction: TextInputAction.done,
@@ -196,3 +189,4 @@ class CreateNewScreen extends StatelessWidget {
     );
   }
 }
+

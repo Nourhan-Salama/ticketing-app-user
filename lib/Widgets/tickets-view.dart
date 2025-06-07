@@ -1,4 +1,6 @@
 // tickets-view.dart
+import 'package:easy_localization/easy_localization.dart';
+import 'package:final_app/Helper/resend-otp-button.dart';
 import 'package:final_app/Widgets/data-tabel.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/screens/ticket-details.dart';
@@ -35,7 +37,7 @@ class _TicketsListState extends State<TicketsList> {
       case 0:
         return Colors.grey;
       case 1:
-        return Colors.blue;
+        return Colors.orange;
       case 2:
         return Colors.green;
       case 3:
@@ -48,13 +50,13 @@ class _TicketsListState extends State<TicketsList> {
   String _getStatusText(int status) {
     switch (status) {
       case 0:
-        return 'Pending';
+        return 'Pending'.tr();
       case 1:
-        return 'In Progress';
+        return 'inProgress'.tr();
       case 2:
-        return '';
+        return 'Resolved'.tr();
       case 3:
-        return 'Closed';
+        return 'Closed'.tr();
       default:
         return 'Unknown';
     }

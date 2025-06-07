@@ -206,8 +206,13 @@
     "closedTickets": "Closed Tickets",
     "niceTitle": "Good Title",
     "goodDescription": "Good Description",
-    "serviceSelected": "Service Selected"
-    
+    "serviceSelected": "Service Selected",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "networkError": "Network error. Please check your connection.",
+ 
+    "sessionExpired": "Your session has expired. Please login again.",
+    "createAccount":"Create Account",
+    "dontHaveAnAccount": "Don't have an account?"
       
    
   
