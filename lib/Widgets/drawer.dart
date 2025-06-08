@@ -5,12 +5,10 @@ import 'package:final_app/screens/all-tickets.dart';
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/services/logout-service.dart';
-import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:final_app/util/colors.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -80,26 +78,29 @@ class _MyDrawerState extends State<MyDrawer> {
   }
 
   Future<void> _performLogout(BuildContext context) async {
-    ScaffoldMessenger.of(context).clearSnackBars();
-
-    final logoutService = LogoutService();
-    final result = await logoutService.logout();
-
-    if (!mounted) return;
-
+    // Close drawer immediately
+    Navigator.pop(context);
+    
+    // Clear tokens regardless of API result
     final storage = FlutterSecureStorage();
-    final tokenAfterLogout = await storage.read(key: 'access_token');
-    final refreshTokenAfterLogout = await storage.read(key: 'refresh_token');
-
-    if (result['code'] == 200 &&
-        tokenAfterLogout == null &&
-        refreshTokenAfterLogout == null) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        LoginScreen.routeName,
-        (route) => false,
-      );
+    await storage.delete(key: 'access_token');
+    await storage.delete(key: 'refresh_token');
+    await storage.delete(key: 'user_name');
+    await storage.delete(key: 'user_email');
+    
+    // Call logout API
+    try {
+      await LogoutService().logout();
+    } catch (e) {
+      print('Logout API error: $e');
     }
+
+    // Navigate to login
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      LoginScreen.routeName,
+      (route) => false,
+    );
   }
 
   @override

@@ -130,6 +130,7 @@
   "Pending": "قيد الانتظار",
 "In Progress": "قيد التنفيذ",
 "Resolved": "تم الحل", 
+"resolved-tickets": "التذاكر المحلولة",
 "Closed": "مغلق",
 "Unknown": "غير معروف",
 "finish": "إنهاء",

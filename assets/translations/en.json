@@ -138,6 +138,7 @@
   "Pending": "Pending",
 "In Progress": "In Progress", 
 "Resolved": "Resolved",
+"resolved-tickets": "Resolved Tickets",
 "Closed": "Closed",
 "Unknown": "Unknown",
 "finish": "Finish",
@@ -212,7 +213,23 @@
  
     "sessionExpired": "Your session has expired. Please login again.",
     "createAccount":"Create Account",
-    "dontHaveAnAccount": "Don't have an account?"
+    "dontHaveAnAccount": "Don't have an account?",
+
+"filter_tickets": "Filter Tickets",
+"ticket_status": "Ticket Status",
+"status_open": "Resolved",
+"status_closed": "Closed",
+"date_range": "Date Range",
+"time_filter": "Time Filter",
+"select_start_date": "Select Start Date",
+"select_end_date": "Select End Date",
+"select_start_time": "Select Start Time",
+"select_end_time": "Select End Time",
+"apply": "Apply",
+"cancel": "Cancel",
+"allTickets": "All Tickets",
+"filter": "Filter",
+"reset": "Reset Filters"
       
    
   

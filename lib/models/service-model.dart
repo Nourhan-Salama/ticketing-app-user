@@ -10,6 +10,7 @@ class ServiceModel {
       name: json['name'] as String,
     );
   }
+    factory ServiceModel.empty() => ServiceModel(id: -1, name: '');
 
   @override
   String toString() => name;

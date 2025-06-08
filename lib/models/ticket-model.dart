@@ -7,15 +7,13 @@ class TicketModel {
   final int status;
   final String description;
   final ServiceModel service;
-  // final String firstName;
-  // final String lastName;
+   final DateTime createdAt;
   final UserModel user;
   final ManagerModel? manager;
   final TechnicianModel? technician;
 
   TicketModel({
-    // required this.firstName,
-    // required this.lastName,
+    required this.createdAt,
     required this.id,
     required this.title,
     required this.status,
@@ -29,6 +27,7 @@ class TicketModel {
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
       id: json['id'] as int,
+      createdAt: DateTime.parse(json['created_at']),
       title: json['title'] as String,
       status: json['status'] as int,
       description: json['description'] as String,
