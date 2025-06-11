@@ -15,7 +15,7 @@ class RestPassApi {
     try {
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', },
         body: jsonEncode({'handle': handle}),
       );
 

@@ -254,6 +254,8 @@ class TicketDetailsScreen extends StatelessWidget {
           _buildInfoItem('user_label'.tr(), ticket.userName),
           SizedBox(height: screenHeight * 0.02),
           _buildInfoItem('technician_label'.tr(), ticket.technicianName ?? 'no_technician_text'.tr()),
+           SizedBox(height: screenHeight * 0.02),
+          _buildInfoItem('createdAt'.tr(), DateFormat('yyyy-MM-dd ').format(userTicket.createdAt)),
         ],
       ],
     );

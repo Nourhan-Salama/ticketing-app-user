@@ -229,7 +229,33 @@
 "cancel": "Cancel",
 "allTickets": "All Tickets",
 "filter": "Filter",
-"reset": "Reset Filters"
+"reset": "Reset Filters",
+"password_empty": "Please enter a password",
+"password_short": "Password must be at least 8 characters",
+"confirm_password_empty": "Please confirm your password",
+"passwords_do_not_match": "Passwords do not match",
+"reset_password_failed": "Failed to reset password",
+"connection_error": "Connection error. Please try again",
+"ok": "OK",
+"sorry": "Sorry",
+"youCanNotEditThisTicket": "You cannot edit this ticket",
+  "createdAt": "Created At",
+    "pagination": "Page {current} of {total}",
+        "filter":"Filter",
+        "resetFilter": "Reset",
+        "enableTime"  : "Enable Time",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "startTime": "Start Time",
+        "endTime": "End Time",
+        "apply":"Apply",
+        "timeFilter": "Time Filter",
+        "dateRange": "Date Range",
+        "ticket_stus": "Ticket Status",
+        "filter_tickets": "Filter Tickets",
+        "from": "From",
+        "to": "To"
+
       
    
   

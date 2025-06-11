@@ -1,132 +1,80 @@
-import 'dart:async';
+
 import 'dart:convert';
 import 'dart:io';
+import 'package:final_app/models/profile-model.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileService {
-  final http.Client client;
-  final FlutterSecureStorage secureStorage;
-  final String baseUrl;
+  static const String _baseUrl = 'https://graduation.arabic4u.org';
+  static const storage = FlutterSecureStorage();
 
-  ProfileService({
-    required this.client,
-    required this.secureStorage,
-    this.baseUrl = "https://graduation.arabic4u.org",
-  });
-
-  Future<String?> _getAccessToken() async {
-    try {
-      return await secureStorage.read(key: 'access_token');
-    } catch (e) {
-      throw Exception('Failed to retrieve access token: $e');
-    }
+  static Future<String?> _getAccessToken() async {
+    return await storage.read(key: 'access_token');
   }
 
-  // Get profile from API
-  Future<Map<String, dynamic>> getProfile() async {
+  static Future<ProfileModel?> getProfile() async {
     final token = await _getAccessToken();
-    if (token == null) throw Exception('User not authenticated');
+    final response = await http.get(
+      Uri.parse('$_baseUrl/auth/profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
 
-    try {
-      final response = await client.get(
-        Uri.parse('$baseUrl/auth/profile'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 30));
-
-      final responseData = json.decode(response.body);
-      if (response.statusCode == 200) {
-        return responseData['data'] ?? {};
-      } else {
-        throw Exception('Failed to load profile: ${responseData['message']}');
-      }
-    } catch (e) {
-      throw Exception('Error loading profile: $e');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return ProfileModel.fromJson(jsonData['data']);
+    } else {
+      print('Get profile failed: ${response.body}');
+      return null;
     }
   }
 
-  // Save image path consistently using the same key
-  Future<void> saveImagePath(String path) async {
-    await secureStorage.write(key: 'user_image_path', value: path);
-  }
-
-  // Remove user image path from storage
-  Future<void> removeUserImage() async {
-    await secureStorage.delete(key: 'user_image_path');
-  }
-
-  // Update profile with name and optional avatar
-  Future<Map<String, dynamic>> updateProfile({
-    required String firstName,
-    required String lastName,
+  static Future<bool> updateProfile({
+   String?name = '',
+    String?email = '',
     File? avatar,
+    bool removeAvatar = false,
   }) async {
     final token = await _getAccessToken();
-    if (token == null) throw Exception('User not authenticated');
+    final request = http.MultipartRequest(
+      'POST', 
+      Uri.parse('$_baseUrl/auth/profile')
+    );
+    
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+    
+    request.fields['name'] = name ?? '';
+    request.fields['email'] = email ?? '';
+    
+    if (avatar != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'avatar', 
+        avatar.path,
+        contentType: MediaType('image', 'jpeg'),
+      ));
+    } else if (removeAvatar) {
+      request.fields['avatar'] = '';
+    }
 
     try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/auth/profile'),
-      );
-
-      request.headers['Authorization'] = 'Bearer $token';
-      request.fields['name'] = '$firstName $lastName';
-
-      if (avatar != null && avatar.existsSync()) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'avatar',
-            avatar.path,
-            filename: avatar.path.split('/').last,
-          ),
-        );
-      }
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      final responseData = json.decode(response.body);
-
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      
       if (response.statusCode == 200) {
-        // If successful, save the image path locally
-        if (avatar != null) {
-          await saveImagePath(avatar.path);
-        }
-        return responseData['data'] ?? {};
+        print('Profile updated successfully');
+        return true;
       } else {
-        throw Exception('Update failed: ${responseData['message']}');
+        print('Update profile failed: $responseBody');
+        return false;
       }
     } catch (e) {
-      throw Exception('Error updating profile: $e');
+      print('Update profile error: $e');
+      return false;
     }
   }
-
-  // Save user data in secure storage
-  Future<void> saveUserData({
-    required String firstName,
-    required String lastName,
-    String? imagePath,
-  }) async {
-    await secureStorage.write(key: 'user_name', value: '$firstName $lastName');
-    if (imagePath != null) {
-      await secureStorage.write(key: 'user_image_path', value: imagePath);
-    }
-  }
-
-  // Load saved user data
-  Future<Map<String, String?>> loadUserData() async {
-    return {
-      'name': await secureStorage.read(key: 'user_name'),
-      'image_path': await secureStorage.read(key: 'user_image_path'),
-    };
-  }
-
-  // Clear local user data
-  Future<void> clearUserData() async {
-    await secureStorage.delete(key: 'user_name');
-    await secureStorage.delete(key: 'user_image_path');
-  }
-}
+} 

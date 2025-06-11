@@ -42,7 +42,7 @@ class _AllTicketsState extends State<AllTickets> {
           } else if (state is TicketsEmpty) {
             return Column(
               children: [
-                CustomDropDownCreateButton(), // Add dropdown here too
+                CustomDropDownCreateButton(), 
                 Expanded(
                   child: Center(child: Text('noTicketsFound'.tr())),
                 ),

@@ -215,8 +215,33 @@
  
     "sessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
     "createAccount": "إنشاء حساب",
-    "dontHaveAnAccount": "ليس لديك حساب؟"
-   
+    "dontHaveAnAccount": "ليس لديك حساب؟",
+    "password_empty": "يرجى إدخال كلمة المرور",
+    "password_short": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "confirm_password_empty": "يرجى تأكيد كلمة المرور",
+    "passwords_do_not_match": "كلمات المرور غير متطابقة",
+    "reset_password_failed": "فشل إعادة تعيين كلمة المرور",
+    "connection_error": "خطأ في الاتصال. يرجى المحاولة مرة أخرى",
+    "ok": "حسنا",
+    "sorry": "عذرًا",
+    "youCanNotEditThisTicket": "لا يمكنك تعديل هذه التذكرة",
+    "createdAt": "تم الإنشاء في",
+      "pagination": "الصفحة {current} من {total}",
+      "filter":"تصفية",
+      "resetFilter":"إعادة تعيين ",
+      "startDate":"تاريخ البدء",
+      "endDate":"تاريخ الانتهاء",
+      "enableTime": "تفعيل الوقت",
+      "startTime": "وقت البدء",
+      "endTime": "وقت الانتهاء",
+      "timeFilter": "تصفية الوقت",
+      "apply": "تطبيق",
+      "dateRange": "نطاق التاريخ",
+      "filter_tickets": "تصفية التذاكر",
+      "ticket_status" : "حالة التذكرة",
+      "from": "من",
+      "to": "إلى",
+      "dateRange": "نطاق التاريخ"
     
   }
   

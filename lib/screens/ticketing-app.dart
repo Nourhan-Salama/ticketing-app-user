@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
 import 'package:final_app/cubits/localization/localization-cubit.dart';
 import 'package:final_app/cubits/notifications/notifications-cubit.dart';
-import 'package:final_app/screens/chande-password.dart';
+import 'package:final_app/screens/change-password.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
@@ -38,6 +38,8 @@ import 'package:final_app/screens/edit-profile.dart';
 import 'package:final_app/screens/user-dashboard.dart';
 import 'package:final_app/screens/rest-screen.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class TicketingApp extends StatelessWidget {
   // final SharedPreferences sharedPreferences;
  final String? accessToken;
@@ -60,8 +62,8 @@ class TicketingApp extends StatelessWidget {
         RepositoryProvider(create: (_) => ResendOtpApi()),
         RepositoryProvider(
           create: (context) => ProfileService(
-            client: context.read<http.Client>(),
-            secureStorage: context.read<FlutterSecureStorage>(),
+            // client: context.read<http.Client>(),
+            // secureStorage: context.read<FlutterSecureStorage>(),
           ),
         ),
         RepositoryProvider(create: (_) => SendForgetPassApi()),
@@ -97,12 +99,13 @@ class TicketingApp extends StatelessWidget {
               ),
             ],
             child: MaterialApp(
+                navigatorObservers: [routeObserver],
               debugShowCheckedModeBanner: false,
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              //initialRoute: accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
-              initialRoute: SplashScreen.routeName,
+         initialRoute:  accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
+            //initialRoute: SplashScreen.routeName,
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
                 LoginScreen.routeName: (_) => LoginScreen(),

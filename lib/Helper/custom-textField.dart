@@ -10,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final IconData? suffixIcon;
   final String? hintText;
   final String label;
+  final String? initialValue;
   final TextEditingController? controller;
   final List<String>? dropdownItems;
    final String? selectedValue; 
@@ -18,6 +19,7 @@ class CustomTextField extends StatefulWidget {
 
   const CustomTextField({
     Key? key,
+    this.initialValue,
     this.selectedValue,
     this.successText,
     this.onSuffixPressed,

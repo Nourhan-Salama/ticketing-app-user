@@ -86,19 +86,19 @@ class _FilterDialogState extends State<FilterDialog> {
                 ),
                 ChoiceChip(
                   label: Text('Resolved'.tr()),
-                  selected: _selectedStatus == 1,
+                  selected: _selectedStatus == 2,
                   onSelected: (selected) {
                     setState(() {
-                      _selectedStatus = selected ? 1 : null;
+                      _selectedStatus = selected ? 2 : null;
                     });
                   },
                 ),
                 ChoiceChip(
                   label: Text('Closed'.tr()),
-                  selected: _selectedStatus == 1,
+                  selected: _selectedStatus == 3,
                   onSelected: (selected) {
                     setState(() {
-                      _selectedStatus = selected ? 1 : null;
+                      _selectedStatus = selected ? 3 : null;
                     });
                   },
                 )
@@ -107,13 +107,13 @@ class _FilterDialogState extends State<FilterDialog> {
             const SizedBox(height: 20),
 
             // Date Range
-            Text('date_range'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('dateRane'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
             Row(
               children: [
                 Expanded(
                   child: ListTile(
                     title: Text(_startDate == null
-                        ? 'select_start_date'.tr()
+                        ? 'from'.tr()
                         : DateFormat.yMd().format(_startDate!)),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () => _selectDate(context, true),
@@ -123,7 +123,7 @@ class _FilterDialogState extends State<FilterDialog> {
                 Expanded(
                   child: ListTile(
                     title: Text(_endDate == null
-                        ? 'select_end_date'.tr()
+                        ? 'to'.tr()
                         : DateFormat.yMd().format(_endDate!)),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () => _selectDate(context, false),
@@ -134,7 +134,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // Time Range
             SwitchListTile(
-              title: Text('time_filter'.tr()),
+              title: Text('enableTime'.tr()),
               value: _enableTimeFilter,
               onChanged: (value) => setState(() => _enableTimeFilter = value),
             ),
@@ -144,7 +144,7 @@ class _FilterDialogState extends State<FilterDialog> {
                   Expanded(
                     child: ListTile(
                       title: Text(_startTime == null
-                          ? 'select_start_time'.tr()
+                          ? 'from'.tr()
                           : _startTime!.format(context)),
                       trailing: const Icon(Icons.access_time),
                       onTap: () => _selectTime(context, true),
@@ -154,7 +154,7 @@ class _FilterDialogState extends State<FilterDialog> {
                   Expanded(
                     child: ListTile(
                       title: Text(_endTime == null
-                          ? 'select_end_time'.tr()
+                          ? 'to'.tr()
                           : _endTime!.format(context)),
                       trailing: const Icon(Icons.access_time),
                       onTap: () => _selectTime(context, false),

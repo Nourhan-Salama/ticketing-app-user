@@ -11,6 +11,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp();
+  final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 
   try {
     const storage = FlutterSecureStorage();

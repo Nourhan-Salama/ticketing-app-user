@@ -70,7 +70,7 @@ class LoginCubit extends Cubit<LoginState> {
 
     if (password.isEmpty) {
       passwordError = "passwordEmpty".tr();
-    } else if (password.length < 8) {
+    } else if (password.length < 3) {
       passwordError = "passwordTooShort".tr();
     }
 

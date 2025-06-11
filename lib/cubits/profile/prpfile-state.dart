@@ -2,97 +2,82 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 
 abstract class ProfileState extends Equatable {
-  const ProfileState();
-
   @override
   List<Object?> get props => [];
 }
 
-class ProfileInitial extends ProfileState {}
-
 class ProfileLoading extends ProfileState {}
+
+class ProfileError extends ProfileState {
+  final String message;
+  ProfileError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
 
 class ProfileLoaded extends ProfileState {
   final String firstName;
   final String lastName;
+  final String email;
+  final String? userId;
   final String? imagePath;
   final File? imageFile;
-  final String? firstNameError;
-  final String? lastNameError;
-  final String? errorMessage;
-  final String? firstNameSuccess;
-  final String? lastNameSuccess;
+  final bool removeImage;
+  final bool isButtonEnabled;
   final bool isLoading;
   final bool isSuccess;
-  final bool isButtonEnabled;
 
-  const ProfileLoaded({
-    this.firstName = '',
-    this.lastName = '',
+  ProfileLoaded({
+    this.userId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
     this.imagePath,
     this.imageFile,
-    this.firstNameError,
-    this.lastNameError,
-    this.errorMessage,
-    this.firstNameSuccess,
-    this.lastNameSuccess,
-    this.isLoading = false,
+    required this.removeImage,
+    required this.isButtonEnabled,
+    required this.isLoading,
     this.isSuccess = false,
-    this.isButtonEnabled = false,
   });
 
   ProfileLoaded copyWith({
+    String? userId, // allow userId to be null or unchanged
     String? firstName,
     String? lastName,
+    String? email,
     String? imagePath,
     File? imageFile,
-    String? firstNameError,
-    String? lastNameError,
-    String? errorMessage,
-    String? firstNameSuccess,
-    String? lastNameSuccess,
+    bool? removeImage,
+    bool? isButtonEnabled,
     bool? isLoading,
     bool? isSuccess,
-    bool? isButtonEnabled,
   }) {
     return ProfileLoaded(
+     userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
       imagePath: imagePath ?? this.imagePath,
-      imageFile: imageFile ?? this.imageFile,
-      firstNameError: firstNameError ?? this.firstNameError,
-      lastNameError: lastNameError ?? this.lastNameError,
-      errorMessage: errorMessage ?? this.errorMessage,
-      firstNameSuccess: firstNameSuccess ?? this.firstNameSuccess,
-      lastNameSuccess: lastNameSuccess ?? this.lastNameSuccess,
+      imageFile: imageFile, // allow override with null explicitly
+      removeImage: removeImage ?? this.removeImage,
+      isButtonEnabled: isButtonEnabled ?? this.isButtonEnabled,
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
-      isButtonEnabled: isButtonEnabled ?? this.isButtonEnabled,
     );
   }
 
   @override
   List<Object?> get props => [
+    userId,
         firstName,
         lastName,
+        email,
         imagePath,
         imageFile,
-        firstNameError,
-        lastNameError,
-        errorMessage,
-        firstNameSuccess,
-        lastNameSuccess,
+        removeImage,
+        isButtonEnabled,
         isLoading,
         isSuccess,
-        isButtonEnabled,
       ];
 }
-
-class ProfileError extends ProfileState {
-  final String message;
-  const ProfileError(this.message);
-
-  @override
-  List<Object> get props => [message];
-}
-
+class ProfileSuccess extends ProfileState {} 

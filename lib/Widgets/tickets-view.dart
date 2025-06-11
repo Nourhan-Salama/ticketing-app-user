@@ -118,11 +118,10 @@ class _TicketsListState extends State<TicketsList> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              TicketDetailsScreen(
-                                ticket: ticketDetails,
-                                userTicket: ticket,
-                              ),
+                          builder: (context) => TicketDetailsScreen(
+                            ticket: ticketDetails,
+                            userTicket: ticket,
+                          ),
                         ),
                       );
                     } catch (e) {
@@ -156,15 +155,20 @@ class _TicketsListState extends State<TicketsList> {
                         .read<TicketsCubit>()
                         .goToPage(widget.currentPage - 1);
                   },
-                  child:
-                      Text('Previous', style: TextStyle(color: Colors.white)),
+                  child: Text('Previous'.tr(),
+                      style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsHelper.darkBlue,
                   ),
                 ),
               SizedBox(width: 16),
               Text(
-                'Page ${widget.currentPage} of ${widget.lastPage}',
+                'pagination'.tr(namedArgs: {
+                  'current': widget.currentPage.toString(),
+                  'total': widget.lastPage.toString(),
+                }),
+
+                // 'Page ${widget.currentPage} of ${widget.lastPage}',
                 style: TextStyle(fontSize: 16, color: ColorsHelper.darkGrey),
               ),
               SizedBox(width: 16),
@@ -175,7 +179,8 @@ class _TicketsListState extends State<TicketsList> {
                         .read<TicketsCubit>()
                         .goToPage(widget.currentPage + 1);
                   },
-                  child: Text('Next', style: TextStyle(color: Colors.white)),
+                  child:
+                      Text('Next'.tr(), style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsHelper.darkBlue,
                   ),

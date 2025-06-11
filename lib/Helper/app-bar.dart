@@ -1,7 +1,10 @@
 import 'package:final_app/Widgets/notifications-badge.dart';
+import 'package:final_app/cubits/profile/profile-cubit.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:final_app/cubits/profile/prpfile-state.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -18,7 +21,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final bool isRTL = Directionality.of(context) == TextDirection.rtl;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -58,9 +61,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         color: ColorsHelper.darkBlue,
                         borderRadius: BorderRadius.circular(5),
                       ),
-                      child: const CircleAvatar(
-                        radius: 22,
-                        backgroundImage: AssetImage('assets/icons/formal.jpg'),
+                      child: BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, state) {
+                          String? imageUrl;
+                          if (state is ProfileLoaded &&
+                              state.imagePath != null &&
+                              state.imagePath!.isNotEmpty) {
+                            imageUrl = state.imagePath!;
+                          }
+
+                          return CircleAvatar(
+                            radius: 22,
+                            backgroundImage: imageUrl != null
+                                ? NetworkImage(imageUrl)
+                                : const AssetImage('assets/icons/formal.jpg') as ImageProvider,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -114,9 +130,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-
-
-
-
 
 

@@ -1,10 +1,19 @@
+
+
 abstract class ChangePasswordState {}
 
 class ChangePasswordInitial extends ChangePasswordState {}
 
 class ChangePasswordValid extends ChangePasswordState {
   final bool isEnabled;
-  ChangePasswordValid(this.isEnabled);
+  final String? passwordError;
+  final String? confirmPasswordError;
+  
+  ChangePasswordValid(
+    this.isEnabled, {
+    this.passwordError,
+    this.confirmPasswordError,
+  });
 }
 
 class ChangePasswordLoading extends ChangePasswordState {}

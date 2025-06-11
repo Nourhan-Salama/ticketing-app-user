@@ -1,4 +1,3 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/Custom-big-button.dart';
 import 'package:final_app/Helper/custom-textField.dart';
@@ -7,7 +6,6 @@ import 'package:final_app/cubits/changePassword/change-pass-state.dart';
 import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class ChangePasswordScreen extends StatelessWidget {
   static const String routeName ='/change-password';
@@ -32,10 +30,8 @@ class ChangePasswordScreen extends StatelessWidget {
               child: BlocConsumer<ChangePasswordCubit, ChangePasswordState>(
                 listener: (context, state) {
                   if (state is ChangePasswordSuccess) {
-                
                     context.read<ChangePasswordCubit>().clearFields();
-
-               
+                    
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('password_reset_successful'.tr()),
@@ -44,7 +40,7 @@ class ChangePasswordScreen extends StatelessWidget {
                     );
 
                     Future.delayed(Duration(seconds: 1), () {
-                      Navigator.pushReplacementNamed(context, '/user-dashboard');
+                      Navigator.pushReplacementNamed(context, '/login');
                     });
                   } else if (state is ChangePasswordFailure) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -59,6 +55,14 @@ class ChangePasswordScreen extends StatelessWidget {
                   final cubit = context.read<ChangePasswordCubit>();
                   bool isButtonEnabled = state is ChangePasswordValid && state.isEnabled;
                   bool isLoading = state is ChangePasswordLoading;
+                  
+                  String? passwordError;
+                  String? confirmPasswordError;
+                  
+                  if (state is ChangePasswordValid) {
+                    passwordError = state.passwordError;
+                    confirmPasswordError = state.confirmPasswordError;
+                  }
 
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -87,6 +91,7 @@ class ChangePasswordScreen extends StatelessWidget {
                         hintText: 'new_password_hint'.tr(),
                         prefixIcon: Icons.lock,
                         controller: cubit.passwordController,
+                        errorText: passwordError,
                         onChanged: (_) => cubit.validatePasswords(),
                       ),
                       SizedBox(height: ResponsiveHelper.heightPercent(context, 0.02)),
@@ -96,6 +101,7 @@ class ChangePasswordScreen extends StatelessWidget {
                         prefixIcon: Icons.lock,
                         obscureText: true,
                         controller: cubit.confirmPasswordController,
+                        errorText: confirmPasswordError,
                         onChanged: (_) => cubit.validatePasswords(),
                       ),
                       SizedBox(height: ResponsiveHelper.heightPercent(context, 0.04)),
@@ -120,5 +126,4 @@ class ChangePasswordScreen extends StatelessWidget {
     );
   }
 }
-
 

@@ -6,7 +6,7 @@ import 'package:final_app/Helper/resend-otp-button.dart';
 import 'package:final_app/Widgets/otp_input_field.dart';
 import 'package:final_app/cubits/otp/otp-verification-cubit.dart';
 import 'package:final_app/cubits/otp/otp-verification-state.dart';
-import 'package:final_app/screens/chande-password.dart';
+import 'package:final_app/screens/change-password.dart';
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/services/resend-otp-api.dart';
 import 'package:final_app/services/verify_user_auth.dart';
