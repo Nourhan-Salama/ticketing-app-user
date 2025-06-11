@@ -1,11 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/enum-helper.dart';
+import 'package:final_app/cubits/conversations/conversation-cubit.dart';
 import 'package:final_app/cubits/localization/localization-cubit.dart';
 import 'package:final_app/cubits/notifications/notifications-cubit.dart';
 import 'package:final_app/screens/change-password.dart';
+import 'package:final_app/screens/chat-screen.dart';
 import 'package:final_app/screens/otp-screen.dart';
 import 'package:final_app/screens/profile.dart';
 import 'package:final_app/screens/splash-screen.dart';
+import 'package:final_app/services/conversation-service.dart';
 import 'package:final_app/services/localization-service.dart';
 import 'package:final_app/services/notifications-services.dart';
 import 'package:final_app/services/service-profile.dart';
@@ -70,6 +73,7 @@ class TicketingApp extends StatelessWidget {
         RepositoryProvider(create: (_) => TicketService()),
         RepositoryProvider(create: (_) => NotificationService()),
         RepositoryProvider(create: (_) => LocalizationService()),
+         RepositoryProvider(create: (context) => ConversationsService()),
       ],
       child: Builder(
         builder: (context) {
@@ -97,6 +101,11 @@ class TicketingApp extends StatelessWidget {
                   context.read<LocalizationService>(),
                 ),
               ),
+               BlocProvider(
+                create: (context) => ConversationsCubit(
+                  conversationsService: context.read<ConversationsService>(),
+                ),
+              ),
             ],
             child: MaterialApp(
                 navigatorObservers: [routeObserver],
@@ -111,7 +120,17 @@ class TicketingApp extends StatelessWidget {
                 LoginScreen.routeName: (_) => LoginScreen(),
                 UserDashboard.routeName: (_) => UserDashboard(),
                 AllTickets.routeName: (_) => AllTickets(),
-                ChatsPage.routeName: (_) => ChatsPage(),
+               //hatsPage.routeName: (_) => ChatsPage(),
+                ChatScreen.routeName: (context) {
+                  final args = ModalRoute.of(context)!.settings.arguments
+                      as Map<String, dynamic>;
+                  final userName = args['userName'] as String;
+                  return ChatScreen(
+                      userName: args['userName'] as String,
+        conversationId: args['conversationId'] as String,
+        currentUserId: args['currentUserId'] as String,
+                  );
+                },
                 EditProfileScreen.routeName: (_) => EditProfileScreen(),
                 Profile.routName: (_) => Profile(),
                 CreateNewScreen.routeName: (_) => CreateNewScreen(),

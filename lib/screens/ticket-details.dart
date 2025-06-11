@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/app-bar.dart';
 import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/cubits/conversations/conversation-cubit.dart';
+import 'package:final_app/cubits/profile/profile-cubit.dart';
+import 'package:final_app/cubits/profile/prpfile-state.dart';
 import 'package:final_app/models/ticket-details-model.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +37,17 @@ class TicketDetailsScreen extends StatelessWidget {
       );
 
       if (!context.mounted) return;
+        // Get current user ID from profile cubit
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is! ProfileLoaded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User profile not loaded')),
+      );
+      return;
+    }
+
+final currentUserId = profileState.userId;
+
 
       if (conversation?.id != null) {
         Navigator.pushNamed(
@@ -43,10 +56,11 @@ class TicketDetailsScreen extends StatelessWidget {
           arguments: {
             'userType': 1,
             'conversationId': conversation!.id,
-            'userId': userTicket.manager!.user.id,
+            //serId': userTicket.manager!.user.id,
             'userName': ticket.managerName ?? 'Manager',
             'ticketId': ticket.id,
-            'receiverId': userTicket.manager!.user.id,
+          //'receiverId': userTicket.manager!.user.id,
+             'currentUserId': currentUserId,
           },
         );
       }
@@ -58,37 +72,59 @@ class TicketDetailsScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _handleChatWithUser(BuildContext context) async {
-    final conversationsCubit = context.read<ConversationsCubit>();
+ Future<void> _handleChatWithUser(BuildContext context) async {
+  final conversationsCubit = context.read<ConversationsCubit>();
 
-    try {
-      final conversation = await conversationsCubit.getOrCreateConversationWithUser(
-        userTicket.user.id,
-      );
+  final technician = userTicket.technician;
 
-      if (!context.mounted) return;
+  if (technician == null || technician.user == null) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('technitian not assigned')),
+    );
+    return;
+  }
 
-      if (conversation?.id != null) {
-        Navigator.pushNamed(
-          context,
-          '/chat-screen',
-          arguments: {
-            'userType': 0,
-            'conversationId': conversation!.id,
-            'userId': userTicket.user.id,
-            'userName': ticket.userName,
-            'ticketId': ticket.id,
-            'receiverId': userTicket.user.id,
-          },
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
+  try {
+    final conversation = await conversationsCubit.getOrCreateConversationWithUser(
+      technician.user.id,
+    );
+
+    if (!context.mounted) return;
+    // Get current user ID from profile cubit
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is! ProfileLoaded) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        const SnackBar(content: Text('User profile not loaded')),
+      );
+      return;
+    }
+ final currentUserId = profileState.userId;
+
+
+    if (conversation?.id != null) {
+      Navigator.pushNamed(
+        context,
+        '/chat-screen',
+        arguments: {
+          'userType': 3,
+          'conversationId': conversation!.id,
+         //userId': technician.user.id, 
+          'userName': technician.user.name,
+          'ticketId': ticket.id,
+         //receiverId': technician.user.id,
+           'currentUserId': currentUserId,
+        },
       );
     }
+  } catch (e) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('حدث خطأ أثناء بدء المحادثة: ${e.toString()}')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

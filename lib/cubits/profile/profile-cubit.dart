@@ -26,6 +26,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       final profile = await ProfileService.getProfile();
       emit(ProfileLoaded(
+         userId: profile?.id.toString(),
         firstName: profile?.firstName ?? '',
         lastName: profile?.lastName ?? '',
         email: profile?.email ?? '',
