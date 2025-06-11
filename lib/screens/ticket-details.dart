@@ -59,7 +59,7 @@ final currentUserId = profileState.userId;
             //serId': userTicket.manager!.user.id,
             'userName': ticket.managerName ?? 'Manager',
             'ticketId': ticket.id,
-          //'receiverId': userTicket.manager!.user.id,
+          //'': userTicket.manager!.user.id,
              'currentUserId': currentUserId,
           },
         );

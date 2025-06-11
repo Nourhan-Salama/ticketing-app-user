@@ -17,11 +17,9 @@ class MessageService {
       print("[GET] Fetching messages for conversation: $conversationId");
       print("Page: $page, Per Page: $perPage");
 
-      // Get auth token
       final String? token = await _storage.read(key: 'access_token');
       if (token == null) throw Exception("Authentication token not found");
 
-      // Make API request
       final response = await http.get(
         Uri.parse(
           "$_baseUrl/api/conversations/$conversationId/messages?page=$page&per_page=$perPage",
@@ -49,36 +47,7 @@ class MessageService {
     }
   }
 
-    // Upload media and get path
-  Future<String> uploadMedia(File file) async {
-    try {
-      final String? token = await _storage.read(key: 'access_token');
-      if (token == null) throw Exception("Authentication token not found");
-
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse("$_baseUrl/api/upload-media"),
-      )..headers.addAll({
-          'Authorization': 'Bearer $token',
-        })..files.add(await http.MultipartFile.fromPath('media', file.path));
-
-      var response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(responseBody);
-        return jsonResponse['media_path'];
-      } else {
-        throw Exception("Upload failed: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error uploading media: $e");
-      rethrow;
-    }
-  }
-
-
-  // Updated sendMessage to handle media upload
+  // Send message with or without media
   Future<Map<String, dynamic>> sendMessage(
     String conversationId, {
     required int type,
@@ -87,36 +56,80 @@ class MessageService {
     String? parentMessageId,
   }) async {
     try {
-      // Upload media first if exists
-      String? finalMediaPath;
-     if (type != 0 && mediaPath != null) {
-  finalMediaPath = await uploadMedia(File(mediaPath));
-}
-
-
+      print("[POST] Sending message - Type: $type, Content: $content, MediaPath: $mediaPath");
+      
       final String? token = await _storage.read(key: 'access_token');
       if (token == null) throw Exception("Authentication token not found");
 
-      final Map<String, dynamic> body = {
-        'type': type,
-        if (content != null) 'content': content,
-        if (finalMediaPath != null) 'media': finalMediaPath,
-        if (parentMessageId != null) 'parent_message_id': parentMessageId,
-      };
+      final uri = Uri.parse("$_baseUrl/api/conversations/$conversationId/messages");
 
-      final response = await http.post(
-        Uri.parse("$_baseUrl/api/conversations/$conversationId/messages"),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode(body),
-      );
+      if (mediaPath != null && mediaPath.isNotEmpty) {
+        print("Sending multipart request with media");
+        
+        // Send multipart with media
+        final request = http.MultipartRequest('POST', uri)
+          ..headers['Authorization'] = 'Bearer $token'
+          ..fields['type'] = type.toString();
 
-      if (response.statusCode == 201) {
-        return json.decode(response.body);
+        if (content != null) {
+          request.fields['content'] = content;
+        }
+        if (parentMessageId != null) {
+          request.fields['parent_message_id'] = parentMessageId;
+        }
+
+        print("Request fields: ${request.fields}");
+        
+        // Add file
+        final file = await http.MultipartFile.fromPath('media', mediaPath);
+        request.files.add(file);
+        
+        print("Added file: ${file.filename}, Size: ${file.length}");
+
+        final streamedResponse = await request.send();
+        final responseBody = await streamedResponse.stream.bytesToString();
+
+        print("Multipart Response Status: ${streamedResponse.statusCode}");
+        print("Multipart Response Body: $responseBody");
+
+        if (streamedResponse.statusCode == 201) {
+          final responseData = json.decode(responseBody);
+          print("Parsed response data: $responseData");
+          return responseData;
+        } else {
+          throw Exception("Send failed: ${streamedResponse.statusCode} - $responseBody");
+        }
       } else {
-        throw Exception("Send failed: ${response.statusCode}");
+        print("Sending JSON request without media");
+        
+        // Send JSON without media
+        final Map<String, dynamic> body = {
+          'type': type,
+          if (content != null) 'content': content,
+          if (parentMessageId != null) 'parent_message_id': parentMessageId,
+        };
+
+        print("Request body: $body");
+
+        final response = await http.post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: json.encode(body),
+        );
+
+        print("JSON Response Status: ${response.statusCode}");
+        print("JSON Response Body: ${response.body}");
+
+        if (response.statusCode == 201) {
+          final responseData = json.decode(response.body);
+          print("Parsed response data: $responseData");
+          return responseData;
+        } else {
+          throw Exception("Send failed: ${response.statusCode} - ${response.body}");
+        }
       }
     } catch (e) {
       print("Error in sendMessage: $e");

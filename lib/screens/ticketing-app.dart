@@ -113,8 +113,8 @@ class TicketingApp extends StatelessWidget {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-         initialRoute:  accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
-            //initialRoute: SplashScreen.routeName,
+     //initialRoute:  accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
+            initialRoute: SplashScreen.routeName,
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
                 LoginScreen.routeName: (_) => LoginScreen(),
