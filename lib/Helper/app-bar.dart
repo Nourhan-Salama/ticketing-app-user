@@ -74,7 +74,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                             radius: 22,
                             backgroundImage: imageUrl != null
                                 ? NetworkImage(imageUrl)
-                                : const AssetImage('assets/icons/formal.jpg') as ImageProvider,
+                                : const AssetImage('assets/icons/avatar.jpg') as ImageProvider,
                           );
                         },
                       ),

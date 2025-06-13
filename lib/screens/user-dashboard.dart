@@ -69,11 +69,14 @@ class _UserDashboardState extends State<UserDashboard> {
             );
           });
 
-          double maxY = fiveYearData.isNotEmpty
-              ? fiveYearData.map((e) => e.count).reduce((a, b) => a > b ? a : b).toDouble() + 1
-              : 10;
+          // Calculate proper maxY for annual data with buffer
+          double maxY = 10; // Default minimum
+          if (fiveYearData.isNotEmpty) {
+            final maxCount = fiveYearData.map((e) => e.count).reduce((a, b) => a > b ? a : b);
+            maxY = (maxCount + (maxCount * 0.2)).clamp(5.0, double.infinity); // Add 20% buffer, minimum 5
+          }
 
-          // For daily respond bar chart, prepare data for last 5 years (year vs 0 or actual)
+          // For daily respond bar chart, prepare data for last 5 years
           final Map<int, double> dailyYearData = {};
           for (var ticket in recentData) {
             final year = DateTime.parse(ticket.createdAt).year;
@@ -84,9 +87,12 @@ class _UserDashboardState extends State<UserDashboard> {
             return FlSpot(index.toDouble(), dailyYearData[year]?.toDouble() ?? 0);
           });
 
-          double dailyMaxY = dailyBarData.isNotEmpty
-              ? dailyBarData.map((e) => e.y).reduce((a, b) => a > b ? a : b) + 1
-              : 5;
+          // Calculate proper maxY for daily data with buffer
+          double dailyMaxY = 5; // Default minimum
+          if (dailyBarData.isNotEmpty) {
+            final maxDaily = dailyBarData.map((e) => e.y).reduce((a, b) => a > b ? a : b);
+            dailyMaxY = (maxDaily + (maxDaily * 0.2)).clamp(5.0, double.infinity); // Add 20% buffer, minimum 5
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -169,6 +175,7 @@ class _UserDashboardState extends State<UserDashboard> {
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
                             maxY: dailyMaxY,
+                            minY: 0,
                             gridData: FlGridData(show: false),
                             borderData: FlBorderData(
                               show: true,
@@ -198,7 +205,7 @@ class _UserDashboardState extends State<UserDashboard> {
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  interval: dailyMaxY > 5 ? 2 : 1,
+                                  interval: dailyMaxY > 10 ? (dailyMaxY / 5).ceilToDouble() : 1,
                                   getTitlesWidget: (value, meta) {
                                     return Text(
                                       value.toInt().toString(),
@@ -233,7 +240,6 @@ class _UserDashboardState extends State<UserDashboard> {
                 const SizedBox(height: 24),
 
                 // Annual Tickets Average Line Chart
-               // Annual Tickets Average Line Chart
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -258,25 +264,37 @@ class _UserDashboardState extends State<UserDashboard> {
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 200,
-                        child: annualData.isNotEmpty
+                        child: fiveYearData.isNotEmpty
                             ? LineChart(
                                 LineChartData(
                                   minX: 0,
-                                  maxX: (annualData.length - 1).toDouble(),
+                                  maxX: (fiveYearData.length - 1).toDouble(),
                                   minY: 0,
                                   maxY: maxY,
-                                  gridData: const FlGridData(show: false),
+                                  clipData: FlClipData.all(), // Ensure clipping
+                                  gridData: FlGridData(
+                                    show: true,
+                                    drawVerticalLine: false,
+                                    horizontalInterval: maxY > 10 ? (maxY / 5).ceilToDouble() : 1,
+                                    getDrawingHorizontalLine: (value) {
+                                      return FlLine(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        strokeWidth: 1,
+                                      );
+                                    },
+                                  ),
                                   titlesData: FlTitlesData(
                                     bottomTitles: AxisTitles(
                                       sideTitles: SideTitles(
                                         showTitles: true,
                                         interval: 1,
                                         getTitlesWidget: (value, meta) {
-                                          if (value.toInt() < annualData.length) {
+                                          int index = value.toInt();
+                                          if (index >= 0 && index < fiveYearData.length) {
                                             return Padding(
                                               padding: const EdgeInsets.only(top: 8.0),
                                               child: Text(
-                                                annualData[value.toInt()].year.toString(),
+                                                fiveYearData[index].year.toString(),
                                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                                               ),
                                             );
@@ -288,7 +306,7 @@ class _UserDashboardState extends State<UserDashboard> {
                                     leftTitles: AxisTitles(
                                       sideTitles: SideTitles(
                                         showTitles: true,
-                                        interval: 1,
+                                        interval: maxY > 10 ? (maxY / 5).ceilToDouble() : 1,
                                         getTitlesWidget: (value, meta) {
                                           return Text(
                                             value.toInt().toString(),
@@ -306,14 +324,18 @@ class _UserDashboardState extends State<UserDashboard> {
                                   ),
                                   lineBarsData: [
                                     LineChartBarData(
-                                      spots: annualData.asMap().entries.map((entry) {
-                                        return FlSpot(entry.key.toDouble(), entry.value.count.toDouble());
+                                      spots: fiveYearData.asMap().entries.map((entry) {
+                                        return FlSpot(
+                                          entry.key.toDouble(), 
+                                          entry.value.count.toDouble().clamp(0.0, maxY)
+                                        );
                                       }).toList(),
                                       isCurved: true,
                                       curveSmoothness: 0.3,
                                       color: ColorsHelper.darkBlue,
-                                      barWidth: 4,
+                                      barWidth: 3,
                                       isStrokeCapRound: true,
+                                      preventCurveOverShooting: true, // Prevent overshooting
                                       dotData: FlDotData(
                                         show: true,
                                         getDotPainter: (spot, percent, barData, index) {
@@ -340,7 +362,7 @@ class _UserDashboardState extends State<UserDashboard> {
                                   ],
                                 ),
                               )
-                            : Center(child: Text('noAnnualTicketsData').tr()),
+                            : Center(child: Text('noAnnualTicketsData'.tr())),
                       ),
                     ],
                   ),
@@ -355,4 +377,3 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 }
-

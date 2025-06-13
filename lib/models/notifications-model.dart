@@ -1,3 +1,4 @@
+// models/notifications-model.dart
 import 'package:flutter/foundation.dart';
 
 enum NotificationType {
@@ -34,6 +35,25 @@ enum NotificationType {
           (match) => ' ${match.group(1)}',
         ).trim();
   }
+
+  String get apiValue {
+    switch (this) {
+      case NotificationType.systemNotification:
+        return 'system_notification';
+      case NotificationType.ticketCreated:
+        return 'ticket_created';
+      case NotificationType.ticketUpdated:
+        return 'ticket_updated';
+      case NotificationType.ticketAssigned:
+        return 'ticket_assigned';
+      case NotificationType.ticketResolved:
+        return 'ticket_resolved';
+      case NotificationType.chat:
+        return 'chat';
+      default:
+        return 'unknown';
+    }
+  }
 }
 
 class NotificationModel {
@@ -58,7 +78,7 @@ class NotificationModel {
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     try {
       return NotificationModel(
-        id: json['id'] ?? '',
+        id: json['id']?.toString() ?? '',
         title: json['title'] ?? 'No Title',
         createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toString()),
         seen: json['seen'] ?? false,
@@ -70,6 +90,18 @@ class NotificationModel {
       debugPrint('Error parsing NotificationModel: $e');
       rethrow;
     }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'created_at': createdAt.toIso8601String(),
+      'seen': seen,
+      'body': body,
+      'data': data.toJson(),
+      'read': read,
+    };
   }
 
   String get formattedTime {
@@ -111,8 +143,15 @@ class NotificationData {
   factory NotificationData.fromJson(Map<String, dynamic> json) {
     return NotificationData(
       type: NotificationType.fromString(json['type'] ?? 'unknown'),
-      modelId: json['model_id'] ?? 0,
+      modelId: int.tryParse(json['model_id']?.toString() ?? '0') ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.apiValue,
+      'model_id': modelId,
+    };
   }
 
   NotificationData copyWith({

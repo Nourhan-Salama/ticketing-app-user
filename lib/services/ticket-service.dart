@@ -123,7 +123,7 @@ class TicketService {
 
   Future<TicketModel> getTicketById(int ticketId) async {
     final headers = await _getAuthHeaders();
-    final url = Uri.parse('https://graduation.arabic4u.org/api/technicians/tickets/$ticketId');
+    final url = Uri.parse('https://graduation.arabic4u.org/api/users/tickets/$ticketId');
 
     var response = await http.get(url, headers: headers);
 
