@@ -5,6 +5,7 @@ import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/models/statistics-model.dart';
 import 'package:final_app/services/statistics-service.dart';
 import 'package:final_app/util/colors.dart';
+import 'package:final_app/util/responsive-helper.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -100,48 +101,52 @@ class _UserDashboardState extends State<UserDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Status Cards
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 0.85,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  children: [
-                    StatusCard(
-                      icon: Icons.airplane_ticket,
-                      title: 'allTickets'.tr(),
-                      value: stats.totalTickets.toString(),
-                      percentage: stats.totalTickets > 0
-                          ? (stats.totalTickets / stats.totalTickets) * 100
-                          : 0,
-                    ),
-                    StatusCard(
-                      icon: Icons.airplane_ticket,
-                      title: 'inProgress'.tr(),
-                      value: stats.inProcessingTickets.toString(),
-                      percentage: stats.totalTickets > 0
-                          ? (stats.inProcessingTickets / stats.totalTickets) * 100
-                          : 0,
-                    ),
-                    StatusCard(
-                      icon: Icons.airplane_ticket,
-                      title: 'closedTickets'.tr(),
-                      value: stats.closedTickets.toString(),
-                      percentage: stats.totalTickets > 0
-                          ? (stats.closedTickets / stats.totalTickets) * 100
-                          : 0,
-                    ),
-                      StatusCard(
-                      icon: Icons.airplane_ticket,
-                      title: 'resolved-tickets'.tr(),
-                      value: stats.openTickets.toString(),
-                      percentage: stats.totalTickets > 0
-                          ? (stats.openTickets / stats.totalTickets) * 100
-                          : 0,
-                    ),
-                  ],
-                ),
+                // In your UserDashboard class build method
+GridView.count(
+  crossAxisCount: 2,
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  childAspectRatio: ResponsiveHelper.responsiveValue( // Make aspect ratio responsive
+    context: context,
+    mobile: 0.95,  // Increased from 0.85
+    tablet: 0.9,
+    desktop: 0.85,
+  ),
+  mainAxisSpacing: 8, // Reduced from 12
+  crossAxisSpacing: 8, // Reduced from 12
+  children: [
+    StatusCard(
+      icon: Icons.airplane_ticket,
+      title: 'allTickets'.tr(),
+      value: stats.totalTickets.toString(),
+      percentage: 100,
+    ),
+    StatusCard(
+      icon: Icons.airplane_ticket,
+      title: 'inProgress'.tr(),
+      value: stats.inProcessingTickets.toString(),
+      percentage: stats.totalTickets > 0
+          ? (stats.inProcessingTickets / stats.totalTickets) * 100
+          : 0,
+    ),
+    StatusCard(
+      icon: Icons.airplane_ticket,
+      title: 'closedTickets'.tr(),
+      value: stats.closedTickets.toString(),
+      percentage: stats.totalTickets > 0
+          ? (stats.closedTickets / stats.totalTickets) * 100
+          : 0,
+    ),
+    StatusCard(
+      icon: Icons.airplane_ticket,
+      title: 'resolved-tickets'.tr(),
+      value: stats.openTickets.toString(),
+      percentage: stats.totalTickets > 0
+          ? (stats.openTickets / stats.totalTickets) * 100
+          : 0,
+    ),
+  ],
+),
 
                 const SizedBox(height: 24),
 

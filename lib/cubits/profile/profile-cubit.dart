@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:final_app/cubits/profile/prpfile-state.dart';
 import 'package:final_app/services/service-profile.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -13,12 +12,12 @@ class ProfileCubit extends Cubit<ProfileState> {
           lastName: '',
           email: '',
           imagePath: null,
+          originalImagePath: null,
           removeImage: false,
           isButtonEnabled: false,
           isLoading: false,
         ));
 
-  // ✅ Load profile with proper error handling
   void loadProfile() async {
     emit(ProfileLoading());
     try {
@@ -30,6 +29,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           lastName: profile.lastName ?? '',
           email: profile.email ?? '',
           imagePath: profile.avatar,
+          originalImagePath: profile.avatar,
           removeImage: false,
           isButtonEnabled: false,
           isLoading: false,
@@ -42,7 +42,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  // ✅ Force refresh profile (always makes API call)
   void refreshProfile() async {
     try {
       final profile = await ProfileService.getProfile();
@@ -53,6 +52,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           lastName: profile.lastName ?? '',
           email: profile.email ?? '',
           imagePath: profile.avatar,
+          originalImagePath: profile.avatar,
           removeImage: false,
           isButtonEnabled: false,
           isLoading: false,
@@ -65,13 +65,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  // ✅ Clear profile state completely
   void clearProfile() {
     emit(ProfileLoaded(
       firstName: '',
       lastName: '',
       email: '',
       imagePath: null,
+      originalImagePath: null,
       removeImage: false,
       isButtonEnabled: false,
       isLoading: false,
@@ -116,6 +116,17 @@ class ProfileCubit extends Cubit<ProfileState> {
     ));
   }
 
+  void restoreOriginalImage() {
+    if (state is! ProfileLoaded) return;
+    final current = state as ProfileLoaded;
+    emit(current.copyWith(
+      imagePath: current.originalImagePath,
+      imageFile: null,
+      removeImage: false,
+      isButtonEnabled: true,
+    ));
+  }
+
   void resetSuccess() {
     if (state is ProfileSuccess) {
       loadProfile();
@@ -133,19 +144,48 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(current.copyWith(isLoading: true));
 
     try {
-      await ProfileService.updateProfile(
+      final success = await ProfileService.updateProfile(
         name: '$firstName $lastName',
         email: email,
         avatar: current.removeImage ? null : current.imageFile,
         removeAvatar: current.removeImage,
       );
 
-      emit(ProfileSuccess());
+      if (success) {
+        emit(ProfileSuccess());
+        await _reloadProfileAfterSave();
+      } else {
+        emit(ProfileError('Failed to update profile'));
+      }
     } catch (e) {
-      emit(ProfileError('Failed to update profile'));
+      emit(ProfileError('Failed to update profile: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _reloadProfileAfterSave() async {
+    try {
+      final profile = await ProfileService.getProfile();
+      if (profile != null) {
+        emit(ProfileLoaded(
+          userId: profile.id.toString(),
+          firstName: profile.firstName ?? '',
+          lastName: profile.lastName ?? '',
+          email: profile.email ?? '',
+          imagePath: profile.avatar,
+          originalImagePath: profile.avatar,
+          removeImage: false,
+          isButtonEnabled: false,
+          isLoading: false,
+        ));
+      } else {
+        emit(ProfileError('Failed to reload profile'));
+      }
+    } catch (e) {
+      emit(ProfileError('Failed to reload profile: ${e.toString()}'));
     }
   }
 }
+
 
 // import 'dart:io';
 // import 'package:final_app/cubits/profile/prpfile-state.dart';
@@ -165,27 +205,66 @@ class ProfileCubit extends Cubit<ProfileState> {
 //           removeImage: false,
 //           isButtonEnabled: false,
 //           isLoading: false,
-//         )) {
-//     loadProfile();
-//   }
+//         ));
 
+//   // ✅ Load profile with proper error handling
 //   void loadProfile() async {
 //     emit(ProfileLoading());
 //     try {
 //       final profile = await ProfileService.getProfile();
-//       emit(ProfileLoaded(
-//          userId: profile?.id.toString(),
-//         firstName: profile?.firstName ?? '',
-//         lastName: profile?.lastName ?? '',
-//         email: profile?.email ?? '',
-//           imagePath: profile?.avatar,
-//         removeImage: false,
-//         isButtonEnabled: false,
-//         isLoading: false,
-//       ));
+//       if (profile != null) {
+//         emit(ProfileLoaded(
+//           userId: profile.id.toString(),
+//           firstName: profile.firstName ?? '',
+//           lastName: profile.lastName ?? '',
+//           email: profile.email ?? '',
+//           imagePath: profile.avatar,
+//           removeImage: false,
+//           isButtonEnabled: false,
+//           isLoading: false,
+//         ));
+//       } else {
+//         emit(ProfileError('Failed to load profile'));
+//       }
 //     } catch (e) {
-//       emit(ProfileError('Failed to load profile'));
+//       emit(ProfileError('Failed to load profile: ${e.toString()}'));
 //     }
+//   }
+
+//   // ✅ Force refresh profile (always makes API call)
+//   void refreshProfile() async {
+//     try {
+//       final profile = await ProfileService.getProfile();
+//       if (profile != null) {
+//         emit(ProfileLoaded(
+//           userId: profile.id.toString(),
+//           firstName: profile.firstName ?? '',
+//           lastName: profile.lastName ?? '',
+//           email: profile.email ?? '',
+//           imagePath: profile.avatar,
+//           removeImage: false,
+//           isButtonEnabled: false,
+//           isLoading: false,
+//         ));
+//       } else {
+//         emit(ProfileError('Failed to refresh profile'));
+//       }
+//     } catch (e) {
+//       emit(ProfileError('Failed to refresh profile: ${e.toString()}'));
+//     }
+//   }
+
+//   // ✅ Clear profile state completely
+//   void clearProfile() {
+//     emit(ProfileLoaded(
+//       firstName: '',
+//       lastName: '',
+//       email: '',
+//       imagePath: null,
+//       removeImage: false,
+//       isButtonEnabled: false,
+//       isLoading: false,
+//     ));
 //   }
 
 //   void updateProfileField({
@@ -214,7 +293,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 //       isButtonEnabled: true,
 //     ));
 //   }
-  
+
 //   void removeImage() {
 //     if (state is! ProfileLoaded) return;
 //     final current = state as ProfileLoaded;
@@ -228,7 +307,187 @@ class ProfileCubit extends Cubit<ProfileState> {
 
 //   void resetSuccess() {
 //     if (state is ProfileSuccess) {
-//       // After showing success, go back to loaded state
+//       loadProfile();
+//     }
+//   }
+
+//   // ✅ SOLUTION: Auto-refresh profile data after successful save
+//   void saveProfile({
+//     required String firstName,
+//     required String lastName,
+//     required String email,
+//   }) async {
+//     if (state is! ProfileLoaded) return;
+//     var current = state as ProfileLoaded;
+
+//     emit(current.copyWith(isLoading: true));
+
+//     try {
+//       final success = await ProfileService.updateProfile(
+//         name: '$firstName $lastName',
+//         email: email,
+//         avatar: current.removeImage ? null : current.imageFile,
+//         removeAvatar: current.removeImage,
+//       );
+
+//       if (success) {
+//         // ✅ First emit success for the snackbar
+//         emit(ProfileSuccess());
+        
+//         // ✅ Then immediately reload the fresh profile data from backend
+//         await Future.delayed(Duration(milliseconds: 100)); // Small delay for UX
+//         await _reloadProfileAfterSave();
+//       } else {
+//         emit(ProfileError('Failed to update profile'));
+//       }
+//     } catch (e) {
+//       emit(ProfileError('Failed to update profile: ${e.toString()}'));
+//     }
+//   }
+
+//   // ✅ Private helper method to reload profile after save
+//   Future<void> _reloadProfileAfterSave() async {
+//     try {
+//       final profile = await ProfileService.getProfile();
+//       if (profile != null) {
+//         emit(ProfileLoaded(
+//           userId: profile.id.toString(),
+//           firstName: profile.firstName ?? '',
+//           lastName: profile.lastName ?? '',
+//           email: profile.email ?? '',
+//           imagePath: profile.avatar, // ✅ This will now be null if removed
+//           removeImage: false, // ✅ Reset remove flag
+//           isButtonEnabled: false, // ✅ Reset button state
+//           isLoading: false,
+//         ));
+//       } else {
+//         emit(ProfileError('Failed to reload profile'));
+//       }
+//     } catch (e) {
+//       emit(ProfileError('Failed to reload profile: ${e.toString()}'));
+//     }
+//   }
+// }
+// import 'dart:io';
+// import 'package:final_app/cubits/profile/prpfile-state.dart';
+// import 'package:final_app/services/service-profile.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+
+// class ProfileCubit extends Cubit<ProfileState> {
+//   final ProfileService _profileService;
+
+//   ProfileCubit(this._profileService)
+//       : super(ProfileLoaded(
+//           firstName: '',
+//           lastName: '',
+//           email: '',
+//           imagePath: null,
+//           removeImage: false,
+//           isButtonEnabled: false,
+//           isLoading: false,
+//         ));
+
+//   // ✅ Load profile with proper error handling
+//   void loadProfile() async {
+//     emit(ProfileLoading());
+//     try {
+//       final profile = await ProfileService.getProfile();
+//       if (profile != null) {
+//         emit(ProfileLoaded(
+//           userId: profile.id.toString(),
+//           firstName: profile.firstName ?? '',
+//           lastName: profile.lastName ?? '',
+//           email: profile.email ?? '',
+//           imagePath: profile.avatar,
+//           removeImage: false,
+//           isButtonEnabled: false,
+//           isLoading: false,
+//         ));
+//       } else {
+//         emit(ProfileError('Failed to load profile'));
+//       }
+//     } catch (e) {
+//       emit(ProfileError('Failed to load profile: ${e.toString()}'));
+//     }
+//   }
+
+//   // ✅ Force refresh profile (always makes API call)
+//   void refreshProfile() async {
+//     try {
+//       final profile = await ProfileService.getProfile();
+//       if (profile != null) {
+//         emit(ProfileLoaded(
+//           userId: profile.id.toString(),
+//           firstName: profile.firstName ?? '',
+//           lastName: profile.lastName ?? '',
+//           email: profile.email ?? '',
+//           imagePath: profile.avatar,
+//           removeImage: false,
+//           isButtonEnabled: false,
+//           isLoading: false,
+//         ));
+//       } else {
+//         emit(ProfileError('Failed to refresh profile'));
+//       }
+//     } catch (e) {
+//       emit(ProfileError('Failed to refresh profile: ${e.toString()}'));
+//     }
+//   }
+
+//   // ✅ Clear profile state completely
+//   void clearProfile() {
+//     emit(ProfileLoaded(
+//       firstName: '',
+//       lastName: '',
+//       email: '',
+//       imagePath: null,
+//       removeImage: false,
+//       isButtonEnabled: false,
+//       isLoading: false,
+//     ));
+//   }
+
+//   void updateProfileField({
+//     String? firstName,
+//     String? lastName,
+//     String? email,
+//   }) {
+//     if (state is! ProfileLoaded) return;
+//     final current = state as ProfileLoaded;
+
+//     final updated = current.copyWith(
+//       firstName: firstName ?? current.firstName,
+//       lastName: lastName ?? current.lastName,
+//       email: email ?? current.email,
+//       isButtonEnabled: true,
+//     );
+//     emit(updated);
+//   }
+
+//   void updateImage(File? file) {
+//     if (state is! ProfileLoaded) return;
+//     final current = state as ProfileLoaded;
+//     emit(current.copyWith(
+//       imageFile: file,
+//       removeImage: file == null,
+//       isButtonEnabled: true,
+//     ));
+//   }
+
+//   void removeImage() {
+//     if (state is! ProfileLoaded) return;
+//     final current = state as ProfileLoaded;
+//     emit(current.copyWith(
+//       imageFile: null,
+//       imagePath: null,
+//       removeImage: true,
+//       isButtonEnabled: true,
+//     ));
+//   }
+
+//   void resetSuccess() {
+//     if (state is ProfileSuccess) {
 //       loadProfile();
 //     }
 //   }
@@ -251,10 +510,10 @@ class ProfileCubit extends Cubit<ProfileState> {
 //         removeAvatar: current.removeImage,
 //       );
 
-//       // Emit success state
 //       emit(ProfileSuccess());
 //     } catch (e) {
 //       emit(ProfileError('Failed to update profile'));
 //     }
 //   }
-// } 
+ 
+// }

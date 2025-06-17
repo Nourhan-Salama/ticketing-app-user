@@ -21,6 +21,7 @@ class ProfileLoaded extends ProfileState {
   final String email;
   final String? userId;
   final String? imagePath;
+   final String? originalImagePath; 
   final File? imageFile;
   final bool removeImage;
   final bool isButtonEnabled;
@@ -30,6 +31,7 @@ class ProfileLoaded extends ProfileState {
   ProfileLoaded({
     this.userId,
     required this.firstName,
+      this.originalImagePath,
     required this.lastName,
     required this.email,
     this.imagePath,
@@ -46,6 +48,7 @@ class ProfileLoaded extends ProfileState {
     String? lastName,
     String? email,
     String? imagePath,
+    
     File? imageFile,
     bool? removeImage,
     bool? isButtonEnabled,
@@ -60,6 +63,7 @@ class ProfileLoaded extends ProfileState {
       imagePath: imagePath ?? this.imagePath,
       imageFile: imageFile, // allow override with null explicitly
       removeImage: removeImage ?? this.removeImage,
+        originalImagePath: originalImagePath ?? this.originalImagePath,
       isButtonEnabled: isButtonEnabled ?? this.isButtonEnabled,
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
@@ -74,6 +78,7 @@ class ProfileLoaded extends ProfileState {
         email,
         imagePath,
         imageFile,
+           originalImagePath,
         removeImage,
         isButtonEnabled,
         isLoading,

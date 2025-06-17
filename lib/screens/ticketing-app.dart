@@ -38,7 +38,6 @@ import 'package:final_app/services/send-forget-pass-api.dart';
 
 import 'package:final_app/screens/login.dart';
 import 'package:final_app/screens/all-tickets.dart';
-import 'package:final_app/screens/chat-page.dart';
 import 'package:final_app/screens/create-new.dart';
 import 'package:final_app/screens/edit-profile.dart';
 import 'package:final_app/screens/user-dashboard.dart';
@@ -109,7 +108,7 @@ class TicketingApp extends StatelessWidget {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              initialRoute: SplashScreen.routeName,
+              home: AccessRouter(accessToken: accessToken),
               routes: {
                 SplashScreen.routeName: (_) => SplashScreen(),
                 LoginScreen.routeName: (_) => LoginScreen(),
@@ -126,7 +125,6 @@ class TicketingApp extends StatelessWidget {
                   );
                 },
                 EditProfileScreen.routeName: (_) => EditProfileScreen(),
-               // Profile.routName: (_) => Profile(),
                 CreateNewScreen.routeName: (_) => CreateNewScreen(),
                 ResetPasswordScreen.routeName: (context) {
                   final sendForgetPassApi =
@@ -172,6 +170,17 @@ class TicketingApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class AccessRouter extends StatelessWidget {
+  final String? accessToken;
+
+  const AccessRouter({super.key, this.accessToken});
+
+  @override
+  Widget build(BuildContext context) {
+    return accessToken == null ? SplashScreen() : UserDashboard();
   }
 }
 
@@ -222,6 +231,7 @@ class _AppInitializerState extends State<AppInitializer> {
 }
 
 
+
 // import 'package:easy_localization/easy_localization.dart';
 // import 'package:final_app/Helper/enum-helper.dart';
 // import 'package:final_app/cubits/conversations/conversation-cubit.dart';
@@ -236,9 +246,11 @@ class _AppInitializerState extends State<AppInitializer> {
 // import 'package:final_app/services/conversation-service.dart';
 // import 'package:final_app/services/localization-service.dart';
 // import 'package:final_app/services/notifications-services.dart';
+// import 'package:final_app/services/push-notification.dart';
 // import 'package:final_app/services/service-profile.dart';
 // import 'package:final_app/services/ticket-service.dart';
 // import 'package:final_app/services/verify_user_auth.dart';
+
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -260,7 +272,7 @@ class _AppInitializerState extends State<AppInitializer> {
 
 // import 'package:final_app/screens/login.dart';
 // import 'package:final_app/screens/all-tickets.dart';
-// import 'package:final_app/screens/chat-page.dart';
+
 // import 'package:final_app/screens/create-new.dart';
 // import 'package:final_app/screens/edit-profile.dart';
 // import 'package:final_app/screens/user-dashboard.dart';
@@ -269,12 +281,10 @@ class _AppInitializerState extends State<AppInitializer> {
 // final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 // class TicketingApp extends StatelessWidget {
-//   // final SharedPreferences sharedPreferences;
-//  final String? accessToken;
-//   const TicketingApp({
-//     super.key,
-//      this.accessToken,
-//   });
+//   final String? accessToken;
+//   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+//   TicketingApp({super.key, this.accessToken});
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -288,81 +298,73 @@ class _AppInitializerState extends State<AppInitializer> {
 //         ),
 //         RepositoryProvider(create: (_) => VerifyUserApi()),
 //         RepositoryProvider(create: (_) => ResendOtpApi()),
-//         RepositoryProvider(
-//           create: (context) => ProfileService(
-//             // client: context.read<http.Client>(),
-//             // secureStorage: context.read<FlutterSecureStorage>(),
-//           ),
-//         ),
+//         RepositoryProvider(create: (_) => ProfileService()),
 //         RepositoryProvider(create: (_) => SendForgetPassApi()),
 //         RepositoryProvider(create: (_) => TicketService()),
 //         RepositoryProvider(create: (_) => NotificationService()),
 //         RepositoryProvider(create: (_) => LocalizationService()),
-//          RepositoryProvider(create: (context) => ConversationsService()),
+//         RepositoryProvider(create: (_) => ConversationsService()),
 //       ],
 //       child: Builder(
 //         builder: (context) {
 //           return MultiBlocProvider(
 //             providers: [
 //               BlocProvider(
-//                 create: (context) =>
-//                     LoginCubit(authApi: context.read<AuthApi>()),
-//               ),
+//                   create: (_) =>
+//                       LoginCubit(authApi: context.read<AuthApi>())),
 //               BlocProvider(create: (_) => RichTextCubit()),
 //               BlocProvider(
-//                   create: (_) => TicketsCubit(context.read<TicketService>())),
+//                   create: (_) =>
+//                       TicketsCubit(context.read<TicketService>())),
 //               BlocProvider(create: (_) => CreateNewCubit()),
 //               BlocProvider(
-//                 create: (context) =>
-//                     ProfileCubit(context.read<ProfileService>()),
-//               ),
+//                   create: (_) =>
+//                       ProfileCubit(context.read<ProfileService>())),
 //               BlocProvider(create: (_) => SignUpCubit()),
 //               BlocProvider(create: (_) => ChangePasswordCubit()),
-//                  BlocProvider(
-//           create: (context) => NotificationsCubit(NotificationService()),
-//         ),
-//                        BlocProvider(
-//                 create: (context) => LocalizationCubit(
+//               BlocProvider(
+//                   create: (_) =>
+//                       NotificationsCubit(context.read<NotificationService>())),
+//               BlocProvider(
+//                 create: (_) => LocalizationCubit(
 //                   context.read<LocalizationService>(),
 //                 ),
 //               ),
-//                BlocProvider(
-//                 create: (context) => ConversationsCubit(
+//               BlocProvider(
+//                 create: (_) => ConversationsCubit(
 //                   conversationsService: context.read<ConversationsService>(),
 //                 ),
 //               ),
 //             ],
 //             child: MaterialApp(
-//                 navigatorObservers: [routeObserver],
 //               debugShowCheckedModeBanner: false,
+//               navigatorObservers: [routeObserver],
+//               navigatorKey: navigatorKey,
 //               localizationsDelegates: context.localizationDelegates,
 //               supportedLocales: context.supportedLocales,
 //               locale: context.locale,
-//      //initialRoute:  accessToken == null ? SplashScreen.routeName : UserDashboard.routeName,
-//             initialRoute: SplashScreen.routeName,
+//               initialRoute: SplashScreen.routeName,
 //               routes: {
 //                 SplashScreen.routeName: (_) => SplashScreen(),
 //                 LoginScreen.routeName: (_) => LoginScreen(),
 //                 UserDashboard.routeName: (_) => UserDashboard(),
 //                 AllTickets.routeName: (_) => AllTickets(),
-//                //hatsPage.routeName: (_) => ChatsPage(),
-//                  '/notifications': (context) => const NotificationsScreen(),
+//                 '/notifications': (_) => const NotificationsScreen(),
 //                 ChatScreen.routeName: (context) {
 //                   final args = ModalRoute.of(context)!.settings.arguments
 //                       as Map<String, dynamic>;
-//                   final userName = args['userName'] as String;
 //                   return ChatScreen(
-//                       userName: args['userName'] as String,
-//         conversationId: args['conversationId'] as String,
-//         currentUserId: args['currentUserId'] as String,
+//                     userName: args['userName'],
+//                     conversationId: args['conversationId'],
+//                     currentUserId: args['currentUserId'],
 //                   );
 //                 },
 //                 EditProfileScreen.routeName: (_) => EditProfileScreen(),
-//                 Profile.routName: (_) => Profile(),
+//                // Profile.routName: (_) => Profile(),
 //                 CreateNewScreen.routeName: (_) => CreateNewScreen(),
 //                 ResetPasswordScreen.routeName: (context) {
 //                   final sendForgetPassApi =
-//                       RepositoryProvider.of<SendForgetPassApi>(context);
+//                       context.read<SendForgetPassApi>();
 //                   return BlocProvider(
 //                     create: (_) => ResetPasswordCubit(sendForgetPassApi),
 //                     child: ResetPasswordScreen(),
@@ -375,21 +377,25 @@ class _AppInitializerState extends State<AppInitializer> {
 //                 OtpVerificationPage.routeName: (context) {
 //                   final args = ModalRoute.of(context)!.settings.arguments
 //                       as Map<String, dynamic>;
-//                   final email = args['email'] as String;
-//                   final otpType = args['otpType'] as OtpType;
 //                   return BlocProvider(
 //                     create: (_) => OtpCubit(
 //                       context.read<VerifyUserApi>(),
 //                       context.read<ResendOtpApi>(),
-//                       email,
-//                       otpType,
+//                       args['email'],
+//                       args['otpType'],
 //                     ),
 //                     child: OtpVerificationPage(
-//                       email: email,
-//                       otpType: otpType,
+//                       email: args['email'],
+//                       otpType: args['otpType'],
 //                     ),
 //                   );
 //                 },
+//               },
+//               builder: (context, child) {
+//                 return AppInitializer(
+//                   navigatorKey: navigatorKey,
+//                   child: child!,
+//                 );
 //               },
 //               theme: ThemeData(
 //                 primarySwatch: Colors.blue,
@@ -402,3 +408,50 @@ class _AppInitializerState extends State<AppInitializer> {
 //     );
 //   }
 // }
+
+// class AppInitializer extends StatefulWidget {
+//   final Widget child;
+//   final GlobalKey<NavigatorState> navigatorKey;
+
+//   const AppInitializer({
+//     super.key,
+//     required this.child,
+//     required this.navigatorKey,
+//   });
+
+//   @override
+//   State<AppInitializer> createState() => _AppInitializerState();
+// }
+
+// class _AppInitializerState extends State<AppInitializer> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     _initializeNotifications();
+//   }
+
+//   Future<void> _initializeNotifications() async {
+//     await Future.delayed(const Duration(seconds: 1));
+//     await NotificationHandler.initialize(
+//       navigationKey: widget.navigatorKey,
+//       onReceived: () {
+//         final context = widget.navigatorKey.currentContext;
+//         if (context != null) {
+//           context.read<NotificationsCubit>().loadNotifications();
+//         }
+//       },
+//       onOpened: (notification) {
+//         final context = widget.navigatorKey.currentContext;
+//         if (context != null) {
+//           context.read<NotificationsCubit>().markAsRead(notification.id);
+//         }
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return widget.child;
+//   }
+// }
+

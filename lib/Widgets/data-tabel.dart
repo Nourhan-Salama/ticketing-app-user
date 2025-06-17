@@ -30,38 +30,39 @@ class DataTableWidget extends StatefulWidget {
 }
 
 class _DataTableWidgetState extends State<DataTableWidget> {
-  void _handleEditPressed(BuildContext context) {
-    final navigator = Navigator.of(context);
-    if (widget.ticket == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ Ticket not found.')),
-      );
-      return;
-    }
+ void _handleEditPressed(BuildContext context) {
+  final navigator = Navigator.of(context);
+  if (widget.ticket == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('⚠️ Ticket not found.')),
+    );
+    return;
+  }
 
-    if (widget.status.toLowerCase() != 'Pending'.tr()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('sorry'.tr()),
-          content: Text('youCanNotEditThisTicket'.tr()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('ok'.tr()),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    navigator.push(
-      MaterialPageRoute(
-        builder: (_) => CreateNewScreen(ticket: widget.ticket),
+  final statusLower = widget.status.toLowerCase();
+  if (statusLower != 'pending' && statusLower != 'قيد الانتظار') {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('sorry'.tr()),
+        content: Text('youCanNotEditThisTicket'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('ok'.tr()),
+          ),
+        ],
       ),
     );
+    return;
   }
+
+  navigator.push(
+    MaterialPageRoute(
+      builder: (_) => CreateNewScreen(ticket: widget.ticket),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

@@ -37,7 +37,7 @@ class ProfileModel {
       name: json['name'],
       email: json['email'],
       phone: json['phone'],
-      avatar: json['avatar'],
+      avatar: json['avatar']?.toString(),
       type: json['type'],
       createdAt: DateTime.parse(json['created_at']),
       lastLoginTime: json['last_login_time'] != null
@@ -61,3 +61,33 @@ class ProfileModel {
     };
   }
 }
+// class ProfileModel {
+//   final int id;
+//   final String? firstName;
+//   final String? lastName;
+//   final String? email;
+//   final String? avatar;
+
+//   ProfileModel({
+//     required this.id,
+//     this.firstName,
+//     this.lastName,
+//     this.email,
+//     this.avatar,
+//   });
+
+//   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+//     // Split name into first and last
+//     final name = json['name']?.toString().split(' ') ?? [];
+//     final firstName = name.isNotEmpty ? name.first : '';
+//     final lastName = name.length > 1 ? name.sublist(1).join(' ') : '';
+
+//     return ProfileModel(
+//       id: json['id'] as int? ?? 0,
+//       firstName: firstName,
+//       lastName: lastName,
+//       email: json['email']?.toString(),
+//       avatar: json['avatar']?.toString(),
+//     );
+//   }
+// }

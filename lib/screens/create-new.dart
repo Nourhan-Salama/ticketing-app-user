@@ -61,7 +61,7 @@ class CreateNewScreen extends StatelessWidget {
       create: (_) => CreateNewCubit(ticket: ticket),
       child: Scaffold(
         appBar: CustomAppBar(
-            title: ticket != null ? 'Edit Ticket'.tr() : 'createNewTicket'.tr()),
+            title: ticket != null ? 'Edit Ticket'.tr() : 'Create New Ticket'.tr()),
         body: BlocConsumer<CreateNewCubit, CreateNewState>(
           listener: (context, state) {
             if (state.submissionError != null) {

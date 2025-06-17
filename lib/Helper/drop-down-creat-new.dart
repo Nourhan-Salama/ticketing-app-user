@@ -53,31 +53,6 @@ class _CustomDropDownCreateButtonState extends State<CustomDropDownCreateButton>
     }
   }
 
-  // Future<void> _showFilterDialog(BuildContext context) async {
-  //   final result = await showDialog<Map<String, dynamic>>(
-  //     context: context,
-  //     builder: (context) => const FilterDialog(),
-  //   );
-
-  //   if (result != null) {
-  //     final ticketCubit = context.read<TicketsCubit>();
-      
-  //     // Apply status filter if selected
-  //     if (result['status'] != null) {
-  //       ticketCubit.filterTicketsByStatus(result['status']);
-  //     }
-  //     // Apply date/time filter if selected
-  //     else if (result['startDate'] != null && result['endDate'] != null) {
-  //       ticketCubit.filterTicketsByDateTimeRange(
-  //         startDate: result['startDate'.tr()],
-  //         endDate: result['endDate'.tr()],
-  //         startTime: result['enableTime'.tr()] ? result['startTime'.tr()] : null,
-  //         endTime: result['enableTime'.tr()] ? result['endTime'.tr()] : null,
-  //       );
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Column(
