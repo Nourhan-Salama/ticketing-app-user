@@ -106,7 +106,7 @@ class _UserDashboardState extends State<UserDashboard> {
                       icon: Icons.airplane_ticket,
                       title: 'allTickets'.tr(),
                       value: stats.totalTickets.toString(),
-                      percentage: 100,
+                       percentage: stats.totalTickets > 0 ? 100 : 0,
                     ),
                     StatusCard(
                       icon: Icons.airplane_ticket,

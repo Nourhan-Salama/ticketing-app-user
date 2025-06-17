@@ -20,7 +20,9 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
       _technicianNotifications = notifications.where((n) =>
         n.data.type == NotificationType.ticketResolved || 
-        n.data.type == NotificationType.chat
+        n.data.type == NotificationType.chat || 
+        n.data.type == NotificationType.ticketAssigned ||
+        n.data.type == NotificationType.ticketUpdated 
       ).toList();
 
       if (unreadCount > 0) {
@@ -93,7 +95,9 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         final originalNotifications = await _service.getAllNotifications();
         _technicianNotifications = originalNotifications.where((n) =>
           n.data.type == NotificationType.ticketResolved || 
-          n.data.type == NotificationType.chat
+          n.data.type == NotificationType.chat ||
+          n.data.type == NotificationType.ticketAssigned ||
+          n.data.type == NotificationType.ticketUpdated
         ).toList();
         
         emit(NotificationsError('${'Failed to mark as read:'.tr()} ${e.toString()}'));
@@ -143,7 +147,9 @@ class NotificationsCubit extends Cubit<NotificationsState> {
         final originalNotifications = await _service.getAllNotifications();
         _technicianNotifications = originalNotifications.where((n) =>
           n.data.type == NotificationType.ticketResolved || 
-          n.data.type == NotificationType.chat
+          n.data.type == NotificationType.chat||
+          n.data.type == NotificationType.ticketAssigned ||
+          n.data.type == NotificationType.ticketUpdated
         ).toList();
         
         emit(NotificationsError('${'Failed to mark all as read:'.tr()} ${e.toString()}'));

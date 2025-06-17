@@ -417,7 +417,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       if (state.messages.isEmpty) {
                         return const Center(
                           child: Text(
-                            ' yet.\nStart a conversation!',
+                            'Start a conversation!',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,

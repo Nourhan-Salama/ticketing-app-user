@@ -1,3 +1,4 @@
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Helper/app-bar.dart';
 import 'package:final_app/Widgets/drawer.dart';
@@ -11,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 
-class TicketDetailsScreen extends StatelessWidget {
+class TicketDetailsScreen extends StatefulWidget {
   final TicketDetailsModel ticket;
   final TicketModel userTicket;
 
@@ -21,8 +22,20 @@ class TicketDetailsScreen extends StatelessWidget {
     required this.userTicket,
   }) : super(key: key);
 
+  @override
+  State<TicketDetailsScreen> createState() => _TicketDetailsScreenState();
+}
+
+class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user profile when the screen opens
+    context.read<ProfileCubit>().loadProfile();
+
+  }
   Future<void> _handleChatWithManager(BuildContext context) async {
-    if (userTicket.manager == null) {
+    if (widget.userTicket.manager == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No manager assigned to this ticket')),
       );
@@ -33,7 +46,7 @@ class TicketDetailsScreen extends StatelessWidget {
 
     try {
       final conversation = await conversationsCubit.getOrCreateConversationWithUser(
-        userTicket.manager!.user.id,
+        widget.userTicket.manager!.user.id,
       );
 
       if (!context.mounted) return;
@@ -57,8 +70,8 @@ final currentUserId = profileState.userId;
             'userType': 1,
             'conversationId': conversation!.id,
             //serId': userTicket.manager!.user.id,
-            'userName': ticket.managerName ?? 'Manager',
-            'ticketId': ticket.id,
+            'userName': widget.ticket.managerName ?? 'Manager',
+            'ticketId': widget.ticket.id,
           //'': userTicket.manager!.user.id,
              'currentUserId': currentUserId,
           },
@@ -75,7 +88,7 @@ final currentUserId = profileState.userId;
  Future<void> _handleChatWithUser(BuildContext context) async {
   final conversationsCubit = context.read<ConversationsCubit>();
 
-  final technician = userTicket.technician;
+  final technician = widget.userTicket.technician;
 
   if (technician == null || technician.user == null) {
     if (!context.mounted) return;
@@ -111,7 +124,7 @@ final currentUserId = profileState.userId;
           'conversationId': conversation!.id,
          //userId': technician.user.id, 
           'userName': technician.user.name,
-          'ticketId': ticket.id,
+          'ticketId': widget.ticket.id,
          //receiverId': technician.user.id,
            'currentUserId': currentUserId,
         },
@@ -124,7 +137,6 @@ final currentUserId = profileState.userId;
     );
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +191,7 @@ final currentUserId = profileState.userId;
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  ticket.description,
+                  widget.ticket.description,
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black54,
@@ -200,7 +212,7 @@ final currentUserId = profileState.userId;
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (userTicket.manager != null)
+                if (widget.userTicket.manager != null)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -277,21 +289,21 @@ final currentUserId = profileState.userId;
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (leftSide) ...[
-          _buildInfoItem('ticket_id_label'.tr(), '${ticket.id}'),
+          _buildInfoItem('ticket_id_label'.tr(), '${widget.ticket.id}'),
           SizedBox(height: screenHeight * 0.02),
-          _buildStatusItem(ticket.statusText, ticket.statusColor),
+          _buildStatusItem(widget.ticket.statusText, widget.ticket.statusColor),
           SizedBox(height: screenHeight * 0.02),
-          _buildInfoItem('service_label'.tr(), ticket.serviceName),
+          _buildInfoItem('service_label'.tr(), widget.userTicket.service.name),
           SizedBox(height: screenHeight * 0.02),
-          _buildInfoItem('manager_label'.tr(), ticket.managerName ?? 'no_manager_text'.tr()),
+          _buildInfoItem('manager_label'.tr(), widget.ticket.managerName ?? 'no_manager_text'.tr()),
         ] else ...[
-          _buildInfoItem('title_label'.tr(), ticket.title),
+          _buildInfoItem('title_label'.tr(), widget.ticket.title),
           SizedBox(height: screenHeight * 0.02),
-          _buildInfoItem('user_label'.tr(), ticket.userName),
+          _buildInfoItem('user_label'.tr(), widget.ticket.userName),
           SizedBox(height: screenHeight * 0.02),
-          _buildInfoItem('technician_label'.tr(), ticket.technicianName ?? 'no_technician_text'.tr()),
+          _buildInfoItem('technician_label'.tr(), widget.ticket.technicianName ?? 'no_technician_text'.tr()),
            SizedBox(height: screenHeight * 0.02),
-          _buildInfoItem('createdAt'.tr(), DateFormat('yyyy-MM-dd ').format(userTicket.createdAt)),
+          _buildInfoItem('createdAt'.tr(), DateFormat('yyyy-MM-dd ').format(widget.userTicket.createdAt)),
         ],
       ],
     );

@@ -242,7 +242,11 @@
       "ticket_status" : "حالة التذكرة",
       "from": "من",
       "to": "إلى",
-      "dateRange": "نطاق التاريخ"
+      "dateRange": "نطاق التاريخ",
+      "Section":"القسم",
+      "Loading Sections": "جارٍ تحميل الأقسام...",
+      "Select service first": "يرجى اختيار الخدمة أولاً",
+      "Select section": "اختر القسم"
     
   }
   

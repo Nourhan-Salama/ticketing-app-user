@@ -65,16 +65,11 @@ class LoginCubit extends Cubit<LoginState> {
     if (email.isEmpty) {
       emailError = 'emailEmpty'.tr();
     }
-    //  else if (!emailRegex.hasMatch(email)) {
-    //   emailError = 'emailInvalid'.tr();
-    // }
-
+  
     if (password.isEmpty) {
       passwordError = "passwordEmpty".tr();
     }
-    //  else if (password.length < 3) {
-    //   passwordError = "passwordTooShort".tr();
-    // }
+   
 
     isButtonEnabled = emailError == null &&
         passwordError == null &&

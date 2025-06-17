@@ -259,7 +259,11 @@
         "filter_tickets": "Filter Tickets",
         "from": "From",
         "to": "To",
-        "lastNameEmpty": "Last name is required"
+        "lastNameEmpty": "Last name is required",
+        "Section": "Section",
+        "Select service first": "Select service first",
+        "Loading Sections...": "Loading Sections...",
+        "Select section": "Select Section"
 
       
    
