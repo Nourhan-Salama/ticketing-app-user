@@ -41,11 +41,22 @@ class TicketsCubit extends Cubit<TicketsState> {
 
       final response = await _ticketService.getPaginatedTickets(currentPageToFetch);
 
-      _currentPage = response['current_page'];
-      _lastPage = response['last_page'];
-      final List<TicketModel> newTickets = response['tickets'];
+      _currentPage = response['current_page'] ?? 1;
+      _lastPage = response['last_page'] ?? 1;
+      
+      // Safe handling of tickets data
+      final dynamic ticketsData = response['tickets'];
+      List<TicketModel> newTickets = [];
+      
+      if (ticketsData != null && ticketsData is List) {
+        newTickets = ticketsData.cast<TicketModel>();
+      }
 
-      _allTickets.addAll(newTickets);
+      if (refresh) {
+        _allTickets = newTickets;
+      } else {
+        _allTickets.addAll(newTickets);
+      }
 
       if (_allTickets.isEmpty) {
         emit(TicketsEmpty());
@@ -192,7 +203,6 @@ class TicketsCubit extends Cubit<TicketsState> {
     return a.hour < b.hour || (a.hour == b.hour && a.minute <= b.minute);
   }
 
-  // New method to fetch all tickets for filtering
   Future<void> fetchAllTickets() async {
     if (_isLoading) return;
     _isLoading = true;

@@ -65,7 +65,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     }
 
     if (password.isEmpty) {
-      passwordError = "passwordEmpty".tr();
+      passwordError = "password_Empty".tr();
     } else if (password.length < 8) {
       passwordError = "passwordShort".tr();
     } else {

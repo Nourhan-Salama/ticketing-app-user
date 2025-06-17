@@ -165,9 +165,10 @@
     "signUPToStart": "سجل لبدء استخدام التطبيق",
       "resend_otp_in": " إرسال رمز التحقق خلال ",
       "chatWithTechnician": "الدردشة مع الفني",
-      "emailEmpty": "البريد الإلكتروني لا يمكن أن يكون فارغًا",
+      "emailEmpty": " مطلوب*   ",
       "emailInvalid": "البريد الإلكتروني غير صالح",
-      "passwordEmpty": "كلمة المرور لا يمكن أن تكون فارغة",
+      "passwordEmpty": "    مطلوب*  ",
+      "password_Empty": "يرجى إدخال كلمة المرور",
       "passwordShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
 
       "serverInvalidResponse": "استجابة غير صالحة من الخادم",

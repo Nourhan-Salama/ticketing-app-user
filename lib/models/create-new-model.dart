@@ -24,18 +24,7 @@ class CreateTicketModel {
     };
   }
 
-  /// Optional: From JSON (if backend returns the same structure)
-  // factory CreateTicketModel.fromJson(Map<String, dynamic> json) {
-  //   return CreateTicketModel(
-  //     firstName: json['first_name'],
-  //     lastName: json['last_name'],
-  //     email: json['email'],
-  //     department: json['department'],
-  //     description: json['description'],
-  //   );
-  // }
 
-  /// Optional: override toString for easier debug
   @override
   String toString() {
     return 'Ticket(firstName: $firstName, lastName: $lastName, email: $email)';

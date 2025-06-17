@@ -48,41 +48,13 @@ class _UserDashboardState extends State<UserDashboard> {
           final annualData = stats.annualTicketsAverage;
           final recentData = stats.recentTickets;
 
-          // Process recent data by year for annual chart
-          final Map<int, double> yearDataMap = {};
-          for (var ticket in recentData) {
-            final year = DateTime.parse(ticket.createdAt).year;
-            yearDataMap.update(year, (value) => value + ticket.status.toDouble(),
-                ifAbsent: () => ticket.status.toDouble());
-          }
-
-          // Generate exactly 5 years of data (current year and previous 4)
-          final currentYear = DateTime.now().year;
-          final fiveYearData = List.generate(5, (index) {
-            final year = currentYear - (4 - index);
-            final existingData = annualData.firstWhere(
-              (e) => e.year == year,
-              orElse: () => AnnualTicket(year: year, count: 0),
-            );
-            return AnnualTicket(
-              year: year,
-              count: yearDataMap[year]?.toInt() ?? existingData.count,
-            );
-          });
-
-          // Calculate proper maxY for annual data with buffer
-          double maxY = 10; // Default minimum
-          if (fiveYearData.isNotEmpty) {
-            final maxCount = fiveYearData.map((e) => e.count).reduce((a, b) => a > b ? a : b);
-            maxY = (maxCount + (maxCount * 0.2)).clamp(5.0, double.infinity); // Add 20% buffer, minimum 5
-          }
-
           // For daily respond bar chart, prepare data for last 5 years
           final Map<int, double> dailyYearData = {};
           for (var ticket in recentData) {
             final year = DateTime.parse(ticket.createdAt).year;
             dailyYearData.update(year, (value) => value + 1, ifAbsent: () => 1);
           }
+          final currentYear = DateTime.now().year;
           final dailyBarData = List.generate(5, (index) {
             final year = currentYear - (4 - index);
             return FlSpot(index.toDouble(), dailyYearData[year]?.toDouble() ?? 0);
@@ -95,58 +67,73 @@ class _UserDashboardState extends State<UserDashboard> {
             dailyMaxY = (maxDaily + (maxDaily * 0.2)).clamp(5.0, double.infinity); // Add 20% buffer, minimum 5
           }
 
+          // For annual chart: Generate exactly 5 years of data (current year and previous 4) from annualData
+          final fiveYearData = List.generate(5, (index) {
+            final year = currentYear - (4 - index);
+            return annualData.firstWhere(
+              (e) => e.year == year,
+              orElse: () => AnnualTicket(year: year, count: 0),
+            );
+          });
+
+          // Calculate proper maxY for annual data with buffer
+          double maxY = 10; // Default minimum
+          if (fiveYearData.isNotEmpty) {
+            final maxCount = fiveYearData.map((e) => e.count).reduce((a, b) => a > b ? a : b);
+            maxY = (maxCount + (maxCount * 0.2)).clamp(5.0, double.infinity); // Add 20% buffer, minimum 5
+          }
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Status Cards
-                // In your UserDashboard class build method
-GridView.count(
-  crossAxisCount: 2,
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  childAspectRatio: ResponsiveHelper.responsiveValue( // Make aspect ratio responsive
-    context: context,
-    mobile: 0.95,  // Increased from 0.85
-    tablet: 0.9,
-    desktop: 0.85,
-  ),
-  mainAxisSpacing: 8, // Reduced from 12
-  crossAxisSpacing: 8, // Reduced from 12
-  children: [
-    StatusCard(
-      icon: Icons.airplane_ticket,
-      title: 'allTickets'.tr(),
-      value: stats.totalTickets.toString(),
-      percentage: 100,
-    ),
-    StatusCard(
-      icon: Icons.airplane_ticket,
-      title: 'inProgress'.tr(),
-      value: stats.inProcessingTickets.toString(),
-      percentage: stats.totalTickets > 0
-          ? (stats.inProcessingTickets / stats.totalTickets) * 100
-          : 0,
-    ),
-    StatusCard(
-      icon: Icons.airplane_ticket,
-      title: 'closedTickets'.tr(),
-      value: stats.closedTickets.toString(),
-      percentage: stats.totalTickets > 0
-          ? (stats.closedTickets / stats.totalTickets) * 100
-          : 0,
-    ),
-    StatusCard(
-      icon: Icons.airplane_ticket,
-      title: 'resolved-tickets'.tr(),
-      value: stats.openTickets.toString(),
-      percentage: stats.totalTickets > 0
-          ? (stats.openTickets / stats.totalTickets) * 100
-          : 0,
-    ),
-  ],
-),
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: ResponsiveHelper.responsiveValue(
+                    context: context,
+                    mobile: 0.95,
+                    tablet: 0.9,
+                    desktop: 0.85,
+                  ),
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  children: [
+                    StatusCard(
+                      icon: Icons.airplane_ticket,
+                      title: 'allTickets'.tr(),
+                      value: stats.totalTickets.toString(),
+                      percentage: 100,
+                    ),
+                    StatusCard(
+                      icon: Icons.airplane_ticket,
+                      title: 'inProgress'.tr(),
+                      value: stats.inProcessingTickets.toString(),
+                      percentage: stats.totalTickets > 0
+                          ? (stats.inProcessingTickets / stats.totalTickets) * 100
+                          : 0,
+                    ),
+                    StatusCard(
+                      icon: Icons.airplane_ticket,
+                      title: 'closedTickets'.tr(),
+                      value: stats.closedTickets.toString(),
+                      percentage: stats.totalTickets > 0
+                          ? (stats.closedTickets / stats.totalTickets) * 100
+                          : 0,
+                    ),
+                    StatusCard(
+                      icon: Icons.airplane_ticket,
+                      title: 'resolved-tickets'.tr(),
+                      value: stats.openTickets.toString(),
+                      percentage: stats.totalTickets > 0
+                          ? (stats.openTickets / stats.totalTickets) * 100
+                          : 0,
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 24),
 
@@ -276,7 +263,7 @@ GridView.count(
                                   maxX: (fiveYearData.length - 1).toDouble(),
                                   minY: 0,
                                   maxY: maxY,
-                                  clipData: FlClipData.all(), // Ensure clipping
+                                  clipData: FlClipData.all(),
                                   gridData: FlGridData(
                                     show: true,
                                     drawVerticalLine: false,
@@ -331,7 +318,7 @@ GridView.count(
                                     LineChartBarData(
                                       spots: fiveYearData.asMap().entries.map((entry) {
                                         return FlSpot(
-                                          entry.key.toDouble(), 
+                                          entry.key.toDouble(),
                                           entry.value.count.toDouble().clamp(0.0, maxY)
                                         );
                                       }).toList(),
@@ -340,7 +327,7 @@ GridView.count(
                                       color: ColorsHelper.darkBlue,
                                       barWidth: 3,
                                       isStrokeCapRound: true,
-                                      preventCurveOverShooting: true, // Prevent overshooting
+                                      preventCurveOverShooting: true,
                                       dotData: FlDotData(
                                         show: true,
                                         getDotPainter: (spot, percent, barData, index) {

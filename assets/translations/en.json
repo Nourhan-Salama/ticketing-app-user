@@ -11,7 +11,7 @@
     "forgotPassword": "Forgot Password",
     "resetPassword": "Reset Password",
     "changePassword": "Change Password",
-    "confirmyourPassword": "Confirm your Password",
+    "confirmYourPassword": "Confirm your Password",
     "newPassword": "New Password",
     "oldPassword": "Old Password",
     "dashboard": "Dashboard",
@@ -26,7 +26,7 @@
     "signIn": "Sign In",
     "forgetPassword": "Forget Password?",
     "loading": "Loading...",
-    "haveAnAccount": "Already have an account?",
+    "haveAnAccount": "Already have an account ? ",
      
   "resetYourPassword": "Reset Your Password",
   "We will send an email with": "We will send an email with.",
@@ -160,7 +160,7 @@
   
   "ticketDetailsNoData": "No ticket details available",
   "donotHaveAnAccount": "Don't have an account?",
-    "createAccount": "Create Account",
+    "createAccount": "ount",
     "firstName": "First Name",
     "lastName": "Last Name",
     "enterFirstName": "Enter your first name",
@@ -170,11 +170,12 @@
         "resend_otp_in": "Resend OTP in",
         "resendOtp": "Resend OTP ?",
         "s":"seconds",
-        "emailEmpty": "Email cannot be empty",
+        "emailEmpty": "Required*",
     "emailInvalid": "Invalid Email",
     "emailAlreadyExists": "Email already exists",
     "passwordsDoNotMatch": "Passwords do not match",
-    "passworEmpty": "Password cannot be empty",
+    "password_Empty":"Paaword is required",
+    "passwordEmpty": "Required*",
     "passwordShort": "Password must be at least 8 characters",
     "passwordsMatch": "Passwords match",
     "errorFristName": "First name is required",
@@ -204,7 +205,7 @@
     "createNew": "Create New ",
     "Create New Ticket": "Create New Ticket",
     "edit": "Edit",
-    "passwordEmpty": "Password cannot be empty",
+
     "passwordShort": "Password must be at least 8 characters",
     "openTickets": "Open Tickets",
     "closedTickets": "Closed Tickets",
@@ -215,8 +216,8 @@
     "networkError": "Network error. Please check your connection.",
  
     "sessionExpired": "Your session has expired. Please login again.",
-    "createAccount":"Create Account",
-    "dontHaveAnAccount": "Don't have an account?",
+    "createAccount":" Create Account",
+    "dontHaveAnAccount": "Don't have an account ? ",
 
 "filter_tickets": "Filter Tickets",
 "ticket_status": "Ticket Status",
@@ -257,7 +258,8 @@
         "ticket_stus": "Ticket Status",
         "filter_tickets": "Filter Tickets",
         "from": "From",
-        "to": "To"
+        "to": "To",
+        "lastNameEmpty": "Last name is required"
 
       
    

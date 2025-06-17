@@ -1,4 +1,4 @@
-// ticket-model.dart
+import 'package:final_app/models/section-model.dart';
 import 'package:final_app/models/service-model.dart';
 
 class TicketModel {
@@ -7,10 +7,11 @@ class TicketModel {
   final int status;
   final String description;
   final ServiceModel service;
-   final DateTime createdAt;
+  final DateTime createdAt;
   final UserModel user;
   final ManagerModel? manager;
   final TechnicianModel? technician;
+  final SectionModel? section;
 
   TicketModel({
     required this.createdAt,
@@ -22,6 +23,7 @@ class TicketModel {
     required this.user,
     this.manager,
     this.technician,
+    this.section,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
@@ -31,10 +33,12 @@ class TicketModel {
       title: json['title'] as String,
       status: json['status'] as int,
       description: json['description'] as String,
-      service: ServiceModel.fromJson(json['service']),
+      // Fixed: Access service through section
+      service: ServiceModel.fromJson(json['section']['service']),
       user: UserModel.fromJson(json['user']),
       manager: json['manager'] != null ? ManagerModel.fromJson(json['manager']) : null,
       technician: json['technician'] != null ? TechnicianModel.fromJson(json['technician']) : null,
+      section: json['section'] != null ? SectionModel.fromJson(json['section']) : null,
     );
   }
 }
@@ -55,13 +59,19 @@ class UserModel {
 
 class ManagerModel {
   final int id;
+  final bool automaticAssignment;
   final UserModel user;
 
-  ManagerModel({required this.id, required this.user});
+  ManagerModel({
+    required this.id,
+    required this.automaticAssignment,
+    required this.user,
+  });
 
   factory ManagerModel.fromJson(Map<String, dynamic> json) {
     return ManagerModel(
       id: json['id'] as int,
+      automaticAssignment: json['automatic_assignment'] as bool,
       user: UserModel.fromJson(json['user']),
     );
   }
@@ -78,5 +88,4 @@ class TechnicianModel {
       id: json['id'] as int,
       user: UserModel.fromJson(json['user']),
     );
-  }
-}
+  }}

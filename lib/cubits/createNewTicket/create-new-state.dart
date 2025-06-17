@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:final_app/models/section-model.dart';
 import 'package:final_app/models/service-model.dart';
 import 'package:final_app/models/ticket-model.dart';
 
@@ -10,8 +11,13 @@ class CreateNewState extends Equatable {
   final String? departmentError;
   final String? titleError;
   final String? serviceError;
+  final List<SectionModel> sections;
+  final SectionModel? selectedSection;
+  final String? sectionError;
+  final String? sectionSuccess;
+  final bool isSectionsLoading;
 
-   final TicketModel? ticketToLoad;
+  final TicketModel? ticketToLoad;
 
   final String? firstNameSuccess;
   final String? lastNameSuccess;
@@ -51,6 +57,11 @@ class CreateNewState extends Equatable {
     this.submissionError,
     this.services = const [],
     this.selectedService,
+    this.sections = const [],
+    this.selectedSection,
+    this.sectionError,
+    this.sectionSuccess,
+    this.isSectionsLoading = false,
   });
 
   factory CreateNewState.initial() => const CreateNewState();
@@ -77,9 +88,14 @@ class CreateNewState extends Equatable {
     String? submissionError,
     List<ServiceModel>? services,
     ServiceModel? selectedService,
+    List<SectionModel>? sections,
+    SectionModel? selectedSection,
+    String? sectionError,
+    String? sectionSuccess,
+    bool? isSectionsLoading,
   }) {
     return CreateNewState(
-       ticketToLoad: ticketToLoad ?? this.ticketToLoad,
+      ticketToLoad: ticketToLoad ?? this.ticketToLoad,
       departmentSuccess: departmentSuccess ?? this.departmentSuccess,
       descriptionSuccess: descriptionSuccess ?? this.descriptionSuccess,
       emailSuccess: emailSuccess ?? this.emailSuccess,
@@ -100,6 +116,11 @@ class CreateNewState extends Equatable {
       submissionError: submissionError,
       services: services ?? this.services,
       selectedService: selectedService ?? this.selectedService,
+      sections: sections ?? this.sections,
+      selectedSection: selectedSection ?? this.selectedSection,
+      sectionError: sectionError ?? this.sectionError,
+      sectionSuccess: sectionSuccess ?? this.sectionSuccess,
+      isSectionsLoading: isSectionsLoading ?? this.isSectionsLoading,
     );
   }
 
@@ -126,5 +147,10 @@ class CreateNewState extends Equatable {
         services,
         selectedService,
         ticketToLoad,
+        sections,
+        selectedSection,
+        sectionError,
+        sectionSuccess,
+        isSectionsLoading,
       ];
 }

@@ -1,9 +1,9 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:final_app/Widgets/drawer.dart';
 import 'package:final_app/cubits/createNewTicket/creat-new-cubit.dart';
 import 'package:final_app/cubits/createNewTicket/create-new-state.dart';
 import 'package:final_app/models/service-model.dart';
+import 'package:final_app/models/section-model.dart';
 import 'package:final_app/models/ticket-model.dart';
 import 'package:final_app/util/colors.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +109,7 @@ class CreateNewScreen extends StatelessWidget {
                         context: context,
                         labelText: 'service'.tr(),
                         hintText: 'selectService'.tr(),
+                        //errorText: state.serviceError,
                         successText: state.serviceSuccess,
                       ),
                       items: state.services.map((ServiceModel service) {
@@ -121,6 +122,36 @@ class CreateNewScreen extends StatelessWidget {
                         context.read<CreateNewCubit>().selectService(newValue);
                       },
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // Sections Dropdown
+                    DropdownButtonFormField<SectionModel>(
+                      value: state.selectedSection,
+                      decoration: getFieldDecoration(
+                        context: context,
+                        labelText: 'Section'.tr(),
+                        hintText: state.isSectionsLoading 
+                            ? 'Loading sections...' 
+                            : state.sections.isEmpty 
+                                ? 'Select service first'
+                                : 'selectSection'.tr(),
+                       // errorText: state.sectionError,
+                        successText: state.sectionSuccess,
+                      ),
+                      items: state.sections.map((SectionModel section) {
+                        return DropdownMenuItem<SectionModel>(
+                          value: section,
+                          child: Text(section.name),
+                        );
+                      }).toList(),
+                      onChanged: state.isSectionsLoading || state.sections.isEmpty
+                          ? null
+                          : (SectionModel? newValue) {
+                              context.read<CreateNewCubit>().selectSection(newValue);
+                            },
+                    ),
+
                     const SizedBox(height: 16),
 
                     // Description Field
@@ -131,6 +162,7 @@ class CreateNewScreen extends StatelessWidget {
                         context: context,
                         labelText: 'description'.tr(),
                         hintText: 'typeDescription'.tr(),
+                       // errorText: state.descriptionError,
                         successText: state.descriptionSuccess,
                       ),
                       maxLines: 5,
@@ -256,7 +288,7 @@ class CreateNewScreen extends StatelessWidget {
 //       create: (_) => CreateNewCubit(ticket: ticket),
 //       child: Scaffold(
 //         appBar: CustomAppBar(
-//             title: ticket != null ? 'Edit Ticket'.tr() : 'createNewTicket'.tr()),
+//             title: ticket != null ? 'Edit Ticket'.tr() : 'Create New Ticket'.tr()),
 //         body: BlocConsumer<CreateNewCubit, CreateNewState>(
 //           listener: (context, state) {
 //             if (state.submissionError != null) {
@@ -272,6 +304,10 @@ class CreateNewScreen extends StatelessWidget {
 //             }
 //           },
 //           builder: (context, state) {
+//             if (state.services.isEmpty) {
+//               return Center(child: CircularProgressIndicator());
+//             }
+            
 //             return Padding(
 //               padding: const EdgeInsets.all(16.0),
 //               child: Form(
@@ -312,7 +348,30 @@ class CreateNewScreen extends StatelessWidget {
 //                         context.read<CreateNewCubit>().selectService(newValue);
 //                       },
 //                     ),
+
 //                     const SizedBox(height: 16),
+
+//                     // sections Dropdown
+//                         DropdownButtonFormField<ServiceModel>(
+//                       value: state.selectedService,
+//                       decoration: getFieldDecoration(
+//                         context: context,
+//                         labelText: 'Section'.tr(),
+//                         hintText: 'selectSection'.tr(),
+//                         successText: state.serviceSuccess,
+//                       ),
+//                       items: state.services.map((ServiceModel service) {
+//                         return DropdownMenuItem<ServiceModel>(
+//                           value: service,
+//                           child: Text(service.name),
+//                         );
+//                       }).toList(),
+//                       onChanged: (ServiceModel? newValue) {
+//                         context.read<CreateNewCubit>().selectService(newValue);
+//                       },
+//                     ),
+
+//                       const SizedBox(height: 16),
 
 //                     // Description Field
 //                     TextFormField(
@@ -385,4 +444,3 @@ class CreateNewScreen extends StatelessWidget {
 //     );
 //   }
 // }
-
